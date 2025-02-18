@@ -3,13 +3,15 @@ import { Modal, Box, Typography, Button, Stack, TextField } from '@mui/material'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { register } from '../api/users';
 
-
-const userKeys = ['firstname', 'lastname', 'email', 'password', 'birthDate'];
+const userKeys = ['firstName', 'lastName', 'email', 'password', 'birthday'];
 
 export default function RegisterModal(props) {
     const [userInfo, setUserInfo] = useState({});
     const [error, setError] = useState({});
+    const [serverError, setServerError] = useState('');
+    const [Loaging, setLoaging] = useState(false);
 
     const handleChange = (event) => {
         const key = event.target.name;
@@ -37,12 +39,28 @@ export default function RegisterModal(props) {
         return success;
     }
     const onRegisterClick = () => {
+        if (Loaging)
+            return;
+        setServerError('');
+        setLoaging(true);
         const noErrors = checkError();
         if (!noErrors) {
+            setLoaging(false)
             return;
         }
-        console.log(userInfo);
-        //נעשה את זה בהמשך
+        const user = {};
+        for (let key of userKeys) {
+            user[key] = userInfo[key];
+        }
+        register(user)
+            .then(() => {
+                props.onClose();
+            })
+            .catch((error) => {
+                setServerError(error.message);
+            }).finally(() => {
+                setLoaging(false);
+            });
     }
 
 
@@ -61,25 +79,27 @@ export default function RegisterModal(props) {
                 <Stack spacing={2}>
                     <TextField
                         required
-                        name='firstname'
+                        name='firstName'
                         variant='outlined'
                         label='First Name'
                         size='small'
-                        value={userInfo.firstname || ''}
+                        value={userInfo.firstName || ''}
                         onChange={handleChange}
-                        error={!!error.firstname}
+                        error={!!error.firstName}
                         helperText={error.firstname || null}
+                        disabled={Loaging}
                     />
                     <TextField
                         required
-                        name='lastname'
+                        name='lastName'
                         variant='outlined'
-                        label='name'
+                        label='Last Name'
                         size='small'
-                        value={userInfo.lastname || ''}
+                        value={userInfo.lastName || ''}
                         onChange={handleChange}
-                        error={!!error.lastname}
+                        error={!!error.lastName}
                         helperText={error.lastname || null}
+                        disabled={Loaging}
                     />
                     <TextField
                         required
@@ -91,11 +111,13 @@ export default function RegisterModal(props) {
                         onChange={handleChange}
                         error={!!error.email}
                         helperText={error.email || null}
+                        disabled={Loaging}
                     />
                     <BirthDatePicker
-                        value={userInfo.birthDate || null}
+                        value={userInfo.birthday || null}
                         onChange={handleChange}
-                        error={!!error.birthDate}
+                        error={!!error.birthday}
+                        disabled={Loaging}
                     />
                     <TextField
                         required
@@ -108,6 +130,7 @@ export default function RegisterModal(props) {
                         onChange={handleChange}
                         error={!!error.password}
                         helperText={error.password || null}
+                        disabled={Loaging}
                     />
                     <TextField
                         required
@@ -120,6 +143,7 @@ export default function RegisterModal(props) {
                         onChange={handleChange}
                         error={!!error.confirmPassword}
                         helperText={error.confirmPassword || null}
+                        disabled={Loaging}
                     />
                     {/* <TextField
                         required
@@ -133,9 +157,14 @@ export default function RegisterModal(props) {
                         helperText={error.googleId || null}
                     /> */}
                     <Button variant='contained' size='small'
-                        onClick={onRegisterClick}>
+                        onClick={onRegisterClick}
+                        disabled={Loaging}
+                    >
                         Register
                     </Button>
+                    {serverError && <Typography variant='h6' color='error'>
+                        {serverError}
+                    </Typography>}
                 </Stack>
             </Box>
         </Modal>
@@ -148,10 +177,11 @@ function BirthDatePicker(props) {
             <DatePicker
                 label='Birthday'
                 value={props.value}
-                onChange={value => props.onChange({ target: { name: 'birthDate', value } })}
+                onChange={value => props.onChange({ target: { name: 'birthday', value } })}
                 error={!!props.error}
                 helperText={props.error || null}
                 size='small'
+                disabled={props.disabled}
             />
         </LocalizationProvider>
     );

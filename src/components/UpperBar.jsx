@@ -65,10 +65,12 @@ function ResponsiveAppBar() {
                             letterSpacing: '.3rem',
                             color: '#e9d0ab',
                             textDecoration: 'none',
+                            textAlign: 'center',
                         }}
                     >
-                        <img src="public/logo.webp" alt="logo" style={{ width: '50px', height: '50px' }} />
                         App mendi
+                        <img src="public/logo.webp" alt="logo" style={{ width: '50px', height: '50px' }} />
+
                     </Typography>
                     {/* תפריט נייד (המבורגר) - מוצג במסכים קטנים */}
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
