@@ -1,5 +1,5 @@
 // ייבוא של הספריות והקומפוננטות הנדרשות
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -15,6 +15,9 @@ import MenuItem from '@mui/material/MenuItem';
 import Popover from '@mui/material/Popover';
 import Login from './Login';
 import RegisterModal from './RegisterModal';
+import { UserContext } from './UserContext';
+import UserCard from './UserCard';
+
 // רשימת העמודים שיוצגו בתפריט
 const pages = ['Products', 'Pricing', 'Blog'];
 // ניהול מצב (State) של הקומפוננטה
@@ -22,7 +25,9 @@ function ResponsiveAppBar() {
     const [anchorElNav, setAnchorElNav] = useState(null);
     const [anchorElUser, setAnchorElUser] = useState(null);
     const [showRegisterModal, setShowRegisterModal] = useState(false);
-    const username = "mendi"
+
+    const { user } = useContext(UserContext);
+
     // פונקציות לטיפול בפתיחת וסגירת התפריטים
     const handleOpenNavMenu = (event) => {
         setAnchorElNav(event.currentTarget);  // פתיחת תפריט הניווט
@@ -53,7 +58,7 @@ function ResponsiveAppBar() {
                 <Toolbar disableGutters>
                     {/* לוגו - מוצג במסכים גדולים */}
                     <Typography
-                        variant="h6"
+                        variant="h5"
                         noWrap
                         component="a"
                         href="#app-bar-with-responsive-menu"
@@ -66,11 +71,13 @@ function ResponsiveAppBar() {
                             color: '#e9d0ab',
                             textDecoration: 'none',
                             textAlign: 'center',
+                            alignItems: 'center',
                         }}
                     >
+                        {/* שם האפליקציה */}
                         App mendi
+                        {/* לוגו */}
                         <img src="public/logo.webp" alt="logo" style={{ width: '50px', height: '50px' }} />
-
                     </Typography>
                     {/* תפריט נייד (המבורגר) - מוצג במסכים קטנים */}
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
@@ -143,7 +150,7 @@ function ResponsiveAppBar() {
                     <Box sx={{ flexGrow: 0, color: '#658285' }}>
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                <Avatar alt={username} src='true' />
+                                {user ? <Avatar>{user.firstName[0]}{user.lastName[0]}</Avatar> : <Avatar />}
                             </IconButton>
                         </Tooltip>
                         {/* תפריט המשתמש */}
@@ -160,7 +167,11 @@ function ResponsiveAppBar() {
                                 horizontal: 'right',
                             }}
                         >
-                            <Login openRegister={handleOpenRegisterModal} />
+                            {/* בדיקה האם יש משתמש מחובר */}
+                            {user ? <UserCard closeUser={handleCloseUserMenu} /> : <Login
+                                openRegister={handleOpenRegisterModal}
+                                closeLogin={handleCloseUserMenu}
+                            />}
                         </Popover>
                     </Box>
                 </Toolbar>

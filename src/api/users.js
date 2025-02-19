@@ -14,6 +14,19 @@ export async function register(user) {
 
     const obj = await response.json();
     if (obj.success)
-        return obj.data;
+        return { data: obj.data, token: obj.token };
     throw new Error(obj.message);
 }
+// פונקציה להתחברות למערכת
+export async function login(email, password) {
+    const response = await fetch(BASE_URL + '/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+        headers: { 'Content-Type': 'application/json' }
+    });
+    const obj = await response.json();
+    if (obj.success)
+        return { data: obj.data, token: obj.token };
+    throw new Error(obj.message);
+}
+

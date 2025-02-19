@@ -4,7 +4,10 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { register } from '../api/users';
+import { useContext } from 'react';
+import { UserContext } from './UserContext';
 
+// מספר המשתמש המחובר
 const userKeys = ['firstName', 'lastName', 'email', 'password', 'birthday'];
 
 export default function RegisterModal(props) {
@@ -12,12 +15,14 @@ export default function RegisterModal(props) {
     const [error, setError] = useState({});
     const [serverError, setServerError] = useState('');
     const [Loaging, setLoaging] = useState(false);
-
+    const { logUser } = useContext(UserContext);
+    // פונקציה שמכילה את המשתנים של המשתמש והטוקן
     const handleChange = (event) => {
         const key = event.target.name;
         const value = event.target.value;
         setUserInfo({ ...userInfo, [key]: value });
     };
+    // פונקציה שמכילה את השגיאות של המשתמש והטוקן
     const checkError = () => {
         const errorsOdiect = {};
         let success = true;
@@ -38,6 +43,7 @@ export default function RegisterModal(props) {
         setError(errorsOdiect);
         return success;
     }
+    // פונקציה שמכילה את המשתמש והטוקן
     const onRegisterClick = () => {
         if (Loaging)
             return;
@@ -53,7 +59,8 @@ export default function RegisterModal(props) {
             user[key] = userInfo[key];
         }
         register(user)
-            .then(() => {
+            .then(({ data, token }) => {
+                logUser(data, token);
                 props.onClose();
             })
             .catch((error) => {
@@ -63,7 +70,7 @@ export default function RegisterModal(props) {
             });
     }
 
-
+    // פונקציה שמכילה את המשתמש והטוקן
     return (
         <Modal open={props.open} onClose={props.onClose}>
             <Box sx={{
