@@ -17,9 +17,15 @@ import Login from './Login';
 import RegisterModal from './RegisterModal';
 import { UserContext } from './UserContext';
 import UserCard from './UserCard';
+import { useNavigate } from 'react-router-dom';
 
-// רשימת העמודים שיוצגו בתפריט
-const pages = ['Products', 'Pricing', 'Blog'];
+// רשימת העמודים עם הנתיבים שלהם
+const pages = [
+    { name: 'Home', path: '/' },
+    { name: 'Income / Expenses', path: '/income-expenses' },
+    { name: 'Tips', path: '/tips' }
+];
+
 // ניהול מצב (State) של הקומפוננטה
 function ResponsiveAppBar() {
     const [anchorElNav, setAnchorElNav] = useState(null);
@@ -27,6 +33,7 @@ function ResponsiveAppBar() {
     const [showRegisterModal, setShowRegisterModal] = useState(false);
 
     const { user } = useContext(UserContext);
+    const navigate = useNavigate();
 
     // פונקציות לטיפול בפתיחת וסגירת התפריטים
     const handleOpenNavMenu = (event) => {
@@ -49,6 +56,11 @@ function ResponsiveAppBar() {
     };
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);    // סגירת תפריט המשתמש
+    };
+
+    const handleNavigation = (path) => {
+        handleCloseNavMenu();
+        navigate(path);
     };
 
     // סרגל הניווט העליון
@@ -91,8 +103,8 @@ function ResponsiveAppBar() {
                         >
                             {/* תפריט נייד - פריטי התפריט */}
                             {pages.map((page) => (
-                                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                                    <Typography sx={{ textAlign: 'center' }}>{page}</Typography>
+                                <MenuItem key={page.name} onClick={() => handleNavigation(page.path)}>
+                                    <Typography sx={{ textAlign: 'center' }}>{page.name}</Typography>
                                 </MenuItem>
                             ))}
                         </Menu>
@@ -142,20 +154,38 @@ function ResponsiveAppBar() {
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {pages.map((page) => (
                             <Button
-                                key={page}
-                                onClick={handleCloseNavMenu}
+                                key={page.name}
+                                onClick={() => handleNavigation(page.path)}
                                 sx={{ my: 2, color: '#e9d0ab', display: 'block' }}
                             >
-                                {page}
+                                {page.name}
                             </Button>
                         ))}
                     </Box>
 
                     {/* אזור המשתמש בצד ימין */}
-                    <Box sx={{ flexGrow: 0, color: '#658285' }}>
-                        <Tooltip title="Open settings">
-                            <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                {user ? <Avatar>{user.firstName[0]}{user.lastName[0]}</Avatar> : <Avatar />}
+                    <Box sx={{ flexGrow: 0 }}>
+                        <Tooltip title="הגדרות משתמש">
+                            <IconButton onClick={handleOpenUserMenu} sx={{
+                                p: 0,
+                                border: '2px solid #e9d0ab',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(233, 208, 171, 0.1)'
+                                }
+                            }}>
+                                {user ? (
+                                    <Avatar sx={{
+                                        bgcolor: '#e9d0ab',
+                                        color: '#658285'
+                                    }}>
+                                        {user.firstName[0]}{user.lastName[0]}
+                                    </Avatar>
+                                ) : (
+                                    <Avatar sx={{
+                                        bgcolor: '#e9d0ab',
+                                        color: '#658285'
+                                    }} />
+                                )}
                             </IconButton>
                         </Tooltip>
                         {/* תפריט המשתמש */}
@@ -171,12 +201,37 @@ function ResponsiveAppBar() {
                                 vertical: 'top',
                                 horizontal: 'right',
                             }}
+                            PaperProps={{
+                                sx: {
+                                    backgroundColor: '#658285',
+                                    color: '#e9d0ab',
+                                    border: '1px solid #e9d0ab',
+                                    '& .MuiInputBase-input': {
+                                        color: '#e9d0ab'
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        color: '#e9d0ab'
+                                    },
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: '#e9d0ab'
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: '#e9d0ab'
+                                        }
+                                    }
+                                }
+                            }}
                         >
                             {/* בדיקה האם יש משתמש מחובר */}
-                            {user ? <UserCard closeUser={handleCloseUserMenu} /> : <Login
-                                openRegister={handleOpenRegisterModal}
-                                closeLogin={handleCloseUserMenu}
-                            />}
+                            {user ? (
+                                <UserCard closeUser={handleCloseUserMenu} />
+                            ) : (
+                                <Login
+                                    openRegister={handleOpenRegisterModal}
+                                    closeLogin={handleCloseUserMenu}
+                                />
+                            )}
                         </Popover>
                     </Box>
                 </Toolbar>
