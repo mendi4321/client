@@ -56,29 +56,11 @@ function ResponsiveAppBar() {
         <AppBar position="static" sx={{ backgroundColor: '#658285' }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    {/* לוגו - מוצג במסכים גדולים */}
-                    <Typography
-                        variant="h5"
-                        noWrap
-                        component="a"
-                        href="#app-bar-with-responsive-menu"
-                        sx={{
-                            mr: 2,
-                            display: { xs: 'none', md: 'flex' },
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            letterSpacing: '.3rem',
-                            color: '#e9d0ab',
-                            textDecoration: 'none',
-                            textAlign: 'center',
-                            alignItems: 'center',
-                        }}
-                    >
-                        {/* שם האפליקציה */}
-                        App mendi
-                        {/* לוגו */}
+                    {/* לוגו בצד שמאל - מוצג בכל המסכים */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
                         <img src="public/logo.webp" alt="logo" style={{ width: '50px', height: '50px' }} />
-                    </Typography>
+                    </Box>
+
                     {/* תפריט נייד (המבורגר) - מוצג במסכים קטנים */}
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                         <IconButton
@@ -115,25 +97,47 @@ function ResponsiveAppBar() {
                             ))}
                         </Menu>
                     </Box>
-                    {/* לוגו - מוצג במסכים קטנים */}
+
+                    {/* שם האפליקציה במרכז */}
                     <Typography
                         variant="h5"
                         noWrap
                         component="a"
                         href="#app-bar-with-responsive-menu"
                         sx={{
-                            mr: 2,
-                            display: { xs: 'flex', md: 'none' },
+                            position: 'absolute',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            fontFamily: 'monospace',
+                            fontWeight: 700,
+                            letterSpacing: '.3rem',
+                            color: '#e9d0ab',
+                            textDecoration: 'none',
+                            display: { xs: 'none', md: 'flex' }  // מוצג רק במסכים גדולים
+                        }}
+                    >
+                        App mendi
+                    </Typography>
+
+                    {/* שם האפליקציה במרכז - למסך קטן */}
+                    <Typography
+                        variant="h5"
+                        noWrap
+                        component="a"
+                        href="#app-bar-with-responsive-menu"
+                        sx={{
                             flexGrow: 1,
                             fontFamily: 'monospace',
                             fontWeight: 700,
                             letterSpacing: '.3rem',
                             color: '#e9d0ab',
                             textDecoration: 'none',
+                            display: { xs: 'flex', md: 'none' }  // מוצג רק במסכים קטנים
                         }}
                     >
                         App mendi
                     </Typography>
+
                     {/* תפריט רגיל - מוצג במסכים גדולים */}
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {pages.map((page) => (
@@ -146,7 +150,8 @@ function ResponsiveAppBar() {
                             </Button>
                         ))}
                     </Box>
-                    {/* אזור המשתמש */}
+
+                    {/* אזור המשתמש בצד ימין */}
                     <Box sx={{ flexGrow: 0, color: '#658285' }}>
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
