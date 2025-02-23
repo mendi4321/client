@@ -3,7 +3,8 @@ import { Box, Typography, Paper, Container, Grid } from '@mui/material';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
 
-function Home() {
+// מסך הבית
+export default function Home() {
     return (
         <Container maxWidth="lg">
             <Box sx={{ mt: 4 }}>
@@ -35,7 +36,7 @@ function Home() {
                                     backgroundColor: '#c8e6c9',
                                     cursor: 'pointer'
                                 }
-                            }}
+                            }}//להצביר כפתור שמפנה למסך ההוצאות והכנסות 
                             onClick={() => window.location.href = '/income-expenses'}
                         >
                             <AccountBalanceWalletIcon sx={{ fontSize: 60, color: '#4caf50', mb: 2 }} />
@@ -61,7 +62,7 @@ function Home() {
                                     backgroundColor: '#bbdefb',
                                     cursor: 'pointer'
                                 }
-                            }}
+                            }}//להצביר כפתור שמפנה למסך הטיפים 
                             onClick={() => window.location.href = '/tips'}
                         >
                             <TipsAndUpdatesIcon sx={{ fontSize: 60, color: '#1976d2', mb: 2 }} />
@@ -91,4 +92,10 @@ function Home() {
     );
 }
 
-export default Home; 
+
+
+
+
+
+
+

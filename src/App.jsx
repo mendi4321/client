@@ -5,6 +5,7 @@ import { UserContextProvider } from './components/UserContext'
 import IncomeExpenses from './components/IncomeExpenses'
 import Home from './components/Home'
 
+
 function App() {
   return (
     <UserContextProvider>

@@ -27,7 +27,7 @@ const pages = [
 ];
 
 // ניהול מצב (State) של הקומפוננטה
-function ResponsiveAppBar() {
+export default function ResponsiveAppBar() {
     const [anchorElNav, setAnchorElNav] = useState(null);
     const [anchorElUser, setAnchorElUser] = useState(null);
     const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -70,7 +70,7 @@ function ResponsiveAppBar() {
                 <Toolbar disableGutters>
                     {/* לוגו בצד שמאל - מוצג בכל המסכים */}
                     <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                        <img src="public/logo.webp" alt="logo" style={{ width: '50px', height: '50px' }} />
+                        <img src="public/logo.png" alt="logo" style={{ width: '50px', height: '50px' }} />
                     </Box>
 
                     {/* תפריט נייד (המבורגר) - מוצג במסכים קטנים */}
@@ -241,4 +241,3 @@ function ResponsiveAppBar() {
         </AppBar>
     );
 }
-export default ResponsiveAppBar;

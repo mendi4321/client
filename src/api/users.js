@@ -1,5 +1,5 @@
 // שהפונקציה תהיה מסודרת ומובטחת
-const BASE_URL = 'http://localhost:3000/api/user';
+const BASE_URL = 'http://localhost:3000/api/user';//
 
 // פונקציה להרשמת משתמש
 export async function register(user) {
@@ -29,4 +29,3 @@ export async function login(email, password) {
         return { data: obj.data, token: obj.token };
     throw new Error(obj.message);
 }
-

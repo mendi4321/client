@@ -9,7 +9,7 @@ import { UserContext } from './UserContext';
 
 // מספר המשתמש המחובר
 const userKeys = ['firstName', 'lastName', 'email', 'password', 'birthday'];
-
+// מסך ההרשמה
 export default function RegisterModal(props) {
     const [userInfo, setUserInfo] = useState({});
     const [error, setError] = useState({});
@@ -177,7 +177,7 @@ export default function RegisterModal(props) {
         </Modal>
     );
 }
-
+// פונקציה שמכילה את המשתמש והטוקן
 function BirthDatePicker(props) {
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
