@@ -70,7 +70,7 @@ export default function RegisterModal(props) {
             });
     }
 
-    // פונקציה שמכילה את המשתמש והטוקן
+    // מסך ההרשמה
     return (
         <Modal open={props.open} onClose={props.onClose}>
             <Box sx={{
@@ -86,6 +86,7 @@ export default function RegisterModal(props) {
                 p: 4
             }}>
                 <Stack spacing={2}>
+                    {/* שדה השם הפרטי */}
                     <TextField
                         required
                         name='firstName'
@@ -107,6 +108,7 @@ export default function RegisterModal(props) {
                             '& .MuiInputBase-input': { color: '#e9d0ab' }
                         }}
                     />
+                    {/* שדה השם האחרון */}
                     <TextField
                         required
                         name='lastName'
@@ -128,6 +130,7 @@ export default function RegisterModal(props) {
                             '& .MuiInputBase-input': { color: '#e9d0ab' }
                         }}
                     />
+                    {/* שדה האימייל */}
                     <TextField
                         required
                         name='email'
@@ -149,12 +152,14 @@ export default function RegisterModal(props) {
                             '& .MuiInputBase-input': { color: '#e9d0ab' }
                         }}
                     />
+                    {/* שדה התאריך */}
                     <BirthDatePicker
                         value={userInfo.birthday || null}
                         onChange={handleChange}
                         error={!!error.birthday}
                         disabled={Loaging}
                     />
+                    {/* שדה הסיסמא */}
                     <TextField
                         required
                         name='password'
@@ -177,6 +182,7 @@ export default function RegisterModal(props) {
                             '& .MuiInputBase-input': { color: '#e9d0ab' }
                         }}
                     />
+                    {/* שדה האימות של הסיסמא */}
                     <TextField
                         required
                         name='confirmPassword'
@@ -210,6 +216,7 @@ export default function RegisterModal(props) {
                         error={!!error.googleId}
                         helperText={error.googleId || null}
                     /> */}
+                    {/* כפתור ההרשמה */}
                     <Button
                         variant='contained'
                         size='small'
@@ -223,6 +230,7 @@ export default function RegisterModal(props) {
                     >
                         Register
                     </Button>
+                    {/* שגיאה בהרשמה */}
                     {serverError && (
                         <Typography variant='h6' sx={{ color: '#f44336' }}>
                             {serverError}

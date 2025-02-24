@@ -20,16 +20,19 @@ import { getTransactions } from "../api/transactionApi";
 import AddTransactionDialog from './AddTransactionDialog';
 import EditTransactionDialog from './EditTransactionDialog';
 
+// מסך ההוצאות  
 export default function Expenses() {
     const [transactions, setTransactions] = useState([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [editTransaction, setEditTransaction] = useState(null);
     const [error, setError] = useState('');
 
+    // טעינת ההוצאות
     useEffect(() => {
         loadTransactions();
     }, []);
 
+    // טעינת ההוצאות
     const loadTransactions = async () => {
         try {
             const data = await getTransactions();
@@ -41,8 +44,10 @@ export default function Expenses() {
         }
     };
 
+    // סינון רק של ההוצאות      
     const totalExpenses = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
 
+    // מסך ההוצאות
     return (
         <Box sx={{ p: 3 }}>
             {error && (
@@ -50,7 +55,7 @@ export default function Expenses() {
                     {error}
                 </Typography>
             )}
-
+            {/* כותרת ההוצאות */}
             <Paper sx={{ p: 2, mb: 4, bgcolor: '#ffebee', textAlign: 'center' }}>
                 <Typography variant="h6">סך כל ההוצאות</Typography>
                 <Typography variant="h4" sx={{ my: 2 }}>
@@ -68,7 +73,7 @@ export default function Expenses() {
                     הוסף הוצאה
                 </Button>
             </Paper>
-
+            {/* טבלת ההוצאות */}
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
@@ -106,14 +111,14 @@ export default function Expenses() {
                     </TableBody>
                 </Table>
             </TableContainer>
-
+            {/* דילוג להוספת הוצאה */}
             <AddTransactionDialog
                 open={showAddDialog}
                 onClose={() => setShowAddDialog(false)}
                 type="expense"
                 onSuccess={loadTransactions}
             />
-
+            {/* דילוג לעריכת הוצאה */}
             <EditTransactionDialog
                 open={!!editTransaction}
                 onClose={() => setEditTransaction(null)}

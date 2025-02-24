@@ -23,9 +23,9 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import dayjs from 'dayjs';
+import { BASE_URL } from '../api/constance';
 
-const API_URL = 'http://localhost:5000/api/reminders';
-
+// מסך התזכורות של המשתמש   
 export default function Reminders() {
     const [reminders, setReminders] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
@@ -35,12 +35,14 @@ export default function Reminders() {
         amount: '',
         dueDate: dayjs()
     });
+    // טעינת התזכורות בכל טעינת הדף
     useEffect(() => {
         fetchReminders();
     }, []);
+    // טעינת התזכורות מהשרת
     const fetchReminders = async () => {
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetch(BASE_URL + 'reminders', {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
@@ -55,10 +57,11 @@ export default function Reminders() {
             setReminders([]);
         }
     };
+    // פונקציה לשמירת התזכורת
     const handleSubmit = async () => {
         try {
             const method = selectedReminder ? 'PUT' : 'POST';
-            const url = selectedReminder ? `${API_URL}/${selectedReminder._id}` : API_URL;
+            const url = selectedReminder ? BASE_URL + 'reminders/' + selectedReminder._id : BASE_URL + 'reminders';
 
             // קבלת נתוני המשתמש מה-localStorage
             const userData = JSON.parse(localStorage.getItem('user-data'));
@@ -76,20 +79,22 @@ export default function Reminders() {
                     userId: userData.id  // הוספת ה-userId לבקשה
                 })
             });
-
+            // בדיקה אם הבקשה נכשלה
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
+            // סגירת הדילוג ושמירת התזכורת  
             handleCloseDialog();
+            // טעינת התזכורות
             fetchReminders();
         } catch (error) {
             console.error('שגיאה בשמירת תזכורת:', error);
         }
     };
+    // פונקציה למחיקת התזכורת
     const handleDelete = async (id) => {
         try {
-            const response = await fetch(`${API_URL}/${id}`, {
+            const response = await fetch(BASE_URL + 'reminders/' + id, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -103,6 +108,7 @@ export default function Reminders() {
             console.error('שגיאה במחיקת תזכורת:', error);
         }
     };
+    // פונקציה לעריכת התזכורת
     const handleEdit = (reminder) => {
         setSelectedReminder(reminder);
         setFormData({
@@ -112,6 +118,7 @@ export default function Reminders() {
         });
         setOpenDialog(true);
     };
+    // פונקציה לסגירת הדילוג
     const handleCloseDialog = () => {
         setOpenDialog(false);
         setSelectedReminder(null);
@@ -120,8 +127,8 @@ export default function Reminders() {
             amount: '',
             dueDate: dayjs()
         });
-
     };
+    // מסך התזכורות
     return (
         <Container maxWidth="md">
             <Box sx={{ mt: 4, mb: 4 }}>
@@ -129,6 +136,7 @@ export default function Reminders() {
                     <Typography variant="h4" component="h1">
                         תזכורות לתשלומים
                     </Typography>
+                    {/* כפתור להוספת תזכורת */}
                     <Button
                         variant="contained"
                         startIcon={<AddIcon />}
@@ -141,6 +149,7 @@ export default function Reminders() {
                         תזכורת חדשה
                     </Button>
                 </Stack>
+                {/* רשימת התזכורות */}
                 <List>
                     {reminders.map((reminder) => (
                         <Paper
@@ -148,12 +157,15 @@ export default function Reminders() {
                             elevation={2}
                             sx={{ mb: 2, borderRadius: 2 }}
                         >
+                            {/* רשימת התזכורות */}
                             <ListItem
                                 secondaryAction={
                                     <Stack direction="row" spacing={1}>
+                                        {/* כפתור לעריכת התזכורת */}
                                         <IconButton onClick={() => handleEdit(reminder)}>
                                             <EditIcon />
                                         </IconButton>
+                                        {/* כפתור למחיקת התזכורת */}
                                         <IconButton
                                             onClick={() => handleDelete(reminder._id)}
                                             sx={{ color: '#d32f2f' }}
@@ -163,6 +175,7 @@ export default function Reminders() {
                                     </Stack>
                                 }
                             >
+                                {/* רשימת התזכורות */}
                                 <ListItemText
                                     primary={
                                         <Typography variant="h6" component="div">
@@ -184,10 +197,12 @@ export default function Reminders() {
                         </Paper>
                     ))}
                 </List>
+                {/* דילוג להוספת תזכורת */}
                 <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
                     <DialogTitle>
                         {selectedReminder ? 'עריכת תזכורת' : 'תזכורת חדשה'}
                     </DialogTitle>
+                    {/* תוכן הדילוג */}
                     <DialogContent>
                         <Stack spacing={3} sx={{ mt: 2 }}>
                             <TextField
@@ -213,8 +228,11 @@ export default function Reminders() {
                             </LocalizationProvider>
                         </Stack>
                     </DialogContent>
+                    {/* כפתורים לסגירת הדילוג ולשמירת התזכורת */}
                     <DialogActions>
+                        {/* כפתור לביטול */}
                         <Button onClick={handleCloseDialog}>ביטול</Button>
+                        {/* כפתור לשמירת התזכורת */}
                         <Button
                             onClick={handleSubmit}
                             variant="contained"

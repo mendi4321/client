@@ -16,6 +16,7 @@ export function UserContextProvider(props) {
         localStorage.removeItem('user-token');
         setUser(null);
     }
+    // טעינת המשתמש המחובר  
     useEffect(() => {
         const token = localStorage.getItem('user-token');
         const userData = localStorage.getItem('user-data');
@@ -27,8 +28,8 @@ export function UserContextProvider(props) {
             setUser(JSON.parse(userData));
         }
     }, []);
+    // מחזיר את המשתמש המחובר ואת הפונקציות הקשורות לו
     const value = { user, logUser, unlogUser };
-
     // מחזיר את המשתמש המחובר ואת הפונקציות הקשורות לו
     return <UserContext.Provider value={value}>
         {props.children}

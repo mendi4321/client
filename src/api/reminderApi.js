@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3001/api/reminders";
+import { BASE_URL } from './constance';//קביעת הבסיס של השרת    
 
 // פונקציה שמחזירה את ההגדרות הבסיסיות לכל בקשה
 const getHeaders = () => ({
@@ -9,7 +9,7 @@ const getHeaders = () => ({
 // קבלת כל התזכורות
 export async function getReminders() {
     try {
-        const response = await fetch(BASE_URL, {
+        const response = await fetch(BASE_URL + 'reminders', {
             headers: getHeaders()
         });
         if (!response.ok) {
@@ -25,7 +25,7 @@ export async function getReminders() {
 // יצירת תזכורת חדשה
 export async function createReminder(reminderData) {
     try {
-        const response = await fetch(BASE_URL, {
+        const response = await fetch(BASE_URL + 'reminders', {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify(reminderData)
@@ -43,7 +43,7 @@ export async function createReminder(reminderData) {
 // עדכון תזכורת קיימת
 export async function updateReminder(id, reminderData) {
     try {
-        const response = await fetch(`${BASE_URL}/${id}`, {
+        const response = await fetch(BASE_URL + 'reminders/' + id, {
             method: 'PUT',
             headers: getHeaders(),
             body: JSON.stringify(reminderData)
@@ -61,7 +61,7 @@ export async function updateReminder(id, reminderData) {
 // מחיקת תזכורת
 export async function deleteReminder(id) {
     try {
-        const response = await fetch(`${BASE_URL}/${id}`, {
+        const response = await fetch(BASE_URL + 'reminders/' + id, {
             method: 'DELETE',
             headers: getHeaders()
         });
@@ -78,7 +78,7 @@ export async function deleteReminder(id) {
 // קבלת תזכורות קרובות (לדף הבית)
 export async function getUpcomingReminders(limit = 3) {
     try {
-        const response = await fetch(`${BASE_URL}?limit=${limit}`, {
+        const response = await fetch(BASE_URL + 'reminders?limit=' + limit, {
             headers: getHeaders()
         });
         if (!response.ok) {

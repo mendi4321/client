@@ -37,10 +37,12 @@ export default function Login(props) {
             backgroundColor: '#658285',
             borderRadius: '8px'
         }}>
+            {/* שדות ההתחברות */}
             <Stack spacing={1}>
                 {error && <Typography variant='h6' sx={{ color: '#f44336' }}>
                     {error}
                 </Typography>}
+                {/* שדה האימייל */}
                 <TextField
                     label="Email"
                     variant="outlined"
@@ -58,6 +60,7 @@ export default function Login(props) {
                         '& .MuiInputBase-input': { color: '#e9d0ab' }
                     }}
                 />
+                {/* שדה הסיסמא */}
                 <TextField
                     label="Password"
                     variant="outlined"
@@ -76,6 +79,7 @@ export default function Login(props) {
                         '& .MuiInputBase-input': { color: '#e9d0ab' }
                     }}
                 />
+                {/* כפתור ההתחברות */}
                 <Button
                     startIcon={<GoogleIcon />}
                     variant="contained"
@@ -88,6 +92,7 @@ export default function Login(props) {
                 >
                     Google
                 </Button>
+                {/* כפתור ההתחברות */}
                 <Button
                     startIcon={<LoginIcon />}
                     variant="contained"
@@ -102,6 +107,7 @@ export default function Login(props) {
                 >
                     Login
                 </Button>
+                {/* כפתור ההרשמה */}
                 <Button
                     startIcon={<PersonIcon />}
                     variant="contained"

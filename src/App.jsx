@@ -11,16 +11,15 @@ import { useContext } from 'react';
 import { UserContext } from './components/UserContext';
 
 // קומפוננטת ProtectedRoute שתבדוק אם המשתמש מחובר
-const ProtectedRoute = ({ children }) => {
-  const { user } = useContext(UserContext);
-
+const ProtectedRoute = ({ children }) => {//מגן על הדף מכך שהמשתמש לא יכול להגיע לדף זה אם לא מחובר
+  const { user } = useContext(UserContext);//מציאת המשתמש מהקונסטקט
   if (!user) {
-    // אם המשתמש לא מחובר, מעביר אותו לדף הבית
-    return <Navigate to="/" />;
+    return <Navigate to="/" />;//אם המשתמש לא מחובר מעביר אותו לדף הבית
   }
-  return children;
+  return children;//אם המשתמש מחובר מציג את הדף המוגן
 };
 
+// קומפוננטת האפליקציה  
 function App() {
   return (
     <UserContextProvider>

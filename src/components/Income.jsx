@@ -20,16 +20,17 @@ import { getTransactions } from "../api/transactionApi";
 import AddTransactionDialog from './AddTransactionDialog';
 import EditTransactionDialog from './EditTransactionDialog';
 
+// מסך ההכנסות
 export default function Income() {
     const [transactions, setTransactions] = useState([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [editTransaction, setEditTransaction] = useState(null);
     const [error, setError] = useState('');
-
+    // טעינת ההכנסות
     useEffect(() => {
         loadTransactions();
     }, []);
-
+    // טעינת ההכנסות
     const loadTransactions = async () => {
         try {
             const data = await getTransactions();
@@ -40,9 +41,9 @@ export default function Income() {
             console.error(err);
         }
     };
-
+    // סינון רק של ההכנסות
     const totalIncome = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
-
+    // מסך ההכנסות
     return (
         <Box sx={{ p: 3 }}>
             {error && (
@@ -50,7 +51,7 @@ export default function Income() {
                     {error}
                 </Typography>
             )}
-
+            {/* כותרת ההכנסות */}
             <Paper sx={{ p: 2, mb: 4, bgcolor: '#e8f5e9', textAlign: 'center' }}>
                 <Typography variant="h6">סך כל ההכנסות</Typography>
                 <Typography variant="h4" sx={{ my: 2 }}>
@@ -68,7 +69,7 @@ export default function Income() {
                     הוסף הכנסה
                 </Button>
             </Paper>
-
+            {/* טבלת ההכנסות */}
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
@@ -106,14 +107,14 @@ export default function Income() {
                     </TableBody>
                 </Table>
             </TableContainer>
-
+            {/* דילוג להוספת הכנסה */}
             <AddTransactionDialog
                 open={showAddDialog}
                 onClose={() => setShowAddDialog(false)}
                 type="income"
                 onSuccess={loadTransactions}
             />
-
+            {/* דילוג לעריכת הכנסה */}
             <EditTransactionDialog
                 open={!!editTransaction}
                 onClose={() => setEditTransaction(null)}

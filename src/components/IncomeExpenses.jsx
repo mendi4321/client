@@ -28,6 +28,7 @@ import { getTransactions, deleteTransaction } from "../api/transactionApi";
 import AddTransactionDialog from './AddTransactionDialog';
 import EditTransactionDialog from './EditTransactionDialog';
 
+// מסך ההכנסות והוצאות
 export default function IncomeExpenses() {
     const [transactions, setTransactions] = useState([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
@@ -48,7 +49,7 @@ export default function IncomeExpenses() {
     useEffect(() => {
         loadTransactions();
     }, []);
-
+    // טעינת העסקאות
     const loadTransactions = async () => {
         try {
             const data = await getTransactions();
@@ -58,19 +59,19 @@ export default function IncomeExpenses() {
             console.error(err);
         }
     };
-
+    // פונקציה להוספת עסקה
     const handleAddClick = (type) => {
         setTransactionType(type);
         setShowAddDialog(true);
     };
-
+    // פונקציה למחיקת עסקה
     const handleDeleteClick = (id) => {
         setDeleteDialog({
             open: true,
             transactionId: id
         });
     };
-
+    // פונקציה למחיקת עסקה
     const handleDeleteConfirm = async () => {
         try {
             await deleteTransaction(deleteDialog.transactionId);
@@ -91,7 +92,7 @@ export default function IncomeExpenses() {
             setDeleteDialog({ open: false, transactionId: null });
         }
     };
-
+    // פונקציה לעריכת עסקה
     const handleEdit = (transaction) => {
         setEditTransaction(transaction);
     };
@@ -100,15 +101,15 @@ export default function IncomeExpenses() {
     const totalIncome = transactions
         .filter(t => t.type === 'income')
         .reduce((sum, t) => sum + Number(t.amount), 0);
-
+    // חישוב סכומים
     const totalExpenses = transactions
         .filter(t => t.type === 'expense')
         .reduce((sum, t) => sum + Number(t.amount), 0);
-
+    // פונקציה לסגירת ה-Snackbar
     const handleCloseSnackbar = () => {
         setSnackbar(prev => ({ ...prev, open: false }));
     };
-
+    // מסך ההכנסות והוצאות
     return (
         <Box sx={{ p: 3 }}>
             {error && (
@@ -116,7 +117,7 @@ export default function IncomeExpenses() {
                     {error}
                 </Typography>
             )}
-
+            {/* תיבת הכנסות והוצאות */}
             <Stack direction="row" spacing={4} sx={{ mb: 4 }}>
                 {/* תיבת הכנסות */}
                 <Paper sx={{ p: 2, flex: 1, bgcolor: '#e8f5e9', textAlign: 'center' }}>
@@ -219,14 +220,17 @@ export default function IncomeExpenses() {
                     sx: { minWidth: '400px' }
                 }}
             >
+                {/* כותרת הדיאלוג */}
                 <DialogTitle>
                     אישור מחיקה
                 </DialogTitle>
+                {/* תוכן הדיאלוג */}
                 <DialogContent>
                     <DialogContentText>
                         האם אתה בטוח שברצונך למחוק עסקה זו?
                     </DialogContentText>
                 </DialogContent>
+                {/* כפתורים הדיאלוג */}
                 <DialogActions>
                     <Button
                         onClick={() => setDeleteDialog({ open: false, transactionId: null })}
@@ -243,7 +247,6 @@ export default function IncomeExpenses() {
                     </Button>
                 </DialogActions>
             </Dialog>
-
             {/* הוספת Snackbar */}
             <Snackbar
                 open={snackbar.open}
@@ -251,6 +254,7 @@ export default function IncomeExpenses() {
                 onClose={handleCloseSnackbar}
                 anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
+                {/* הוספת Snackbar */}
                 <Alert
                     onClose={handleCloseSnackbar}
                     severity={snackbar.severity}

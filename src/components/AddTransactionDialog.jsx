@@ -21,7 +21,7 @@ const categories = {
     income: ['משכורת', 'בונוס', 'השקעות', 'מתנה', 'אחר'],
     expense: ['מזון', 'דיור', 'תחבורה', 'בילויים', 'קניות', 'חשבונות', 'אחר']
 };
-
+// דילוג להוספת עסקה    
 export default function AddTransactionDialog({ open, onClose, type, onSuccess }) {
     const [formData, setFormData] = useState({
         amount: '',
@@ -30,14 +30,14 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
         type: type
     });
     const [error, setError] = useState('');
-
+    // טעינת הסוג של העסקה
     useEffect(() => {
         setFormData(prev => ({
             ...prev,
             type: type
         }));
     }, [type]);
-
+    // פונקציה לשמירת העסקה
     const handleSubmit = async () => {
         if (!formData.amount || !formData.description) {
             setError('נא למלא את כל השדות');
@@ -62,6 +62,7 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
             setError(err.message);
         }
     };
+    // מסך ההוספת עסקה
     return (
         <Dialog
             open={open}
@@ -74,16 +75,21 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
                 }
             }}
         >
+            {/* כותרת הדילוג */}
             <DialogTitle sx={{ color: '#e9d0ab' }}>
                 {type === 'income' ? 'הוספת הכנסה' : 'הוספת הוצאה'}
             </DialogTitle>
+            {/* תוכן הדילוג */}
             <DialogContent>
+                {/* שגיאה בהוספת עסקה */}
                 {error && (
                     <Typography color="error" sx={{ mb: 2 }}>
                         {error}
                     </Typography>
                 )}
+                {/* שדות ההוספה */}
                 <Stack spacing={3} sx={{ mt: 2 }}>
+                    {/* שדה הסכום */}
                     <TextField
                         label="סכום"
                         type="number"
@@ -100,6 +106,7 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
                             '& .MuiInputBase-input': { color: '#e9d0ab' }
                         }}
                     />
+                    {/* שדה התיאור */}
                     <TextField
                         label="תיאור"
                         value={formData.description}
@@ -115,6 +122,7 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
                             '& .MuiInputBase-input': { color: '#e9d0ab' }
                         }}
                     />
+                    {/* שדה התאריך */}
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
                             label="תאריך"
@@ -125,13 +133,16 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
                     </LocalizationProvider>
                 </Stack>
             </DialogContent>
+            {/* כפתורים לסגירת הדילוג ולשמירת העסקה */}
             <DialogActions>
+                {/* כפתור לביטול */}
                 <Button
                     onClick={onClose}
                     sx={{ color: '#e9d0ab' }}
                 >
                     ביטול
                 </Button>
+                {/* כפתור לשמירת העסקה */}
                 <Button
                     onClick={handleSubmit}
                     variant="contained"
@@ -142,6 +153,7 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
                         }
                     }}
                 >
+                    {/* כפתור לשמירת העסקה */}
                     הוסף
                 </Button>
             </DialogActions>

@@ -87,8 +87,10 @@ export default function ResponsiveAppBar() {
                                 onClick={handleOpenNavMenu}
                                 color="#658285"
                             >
+                                {/* תפריט נייד - פריטי התפריט */}
                                 <MenuIcon />
                             </IconButton>
+                            {/* תפריט נייד - פריטי התפריט */}
                             <Menu
                                 id="menu-appbar"
                                 anchorEl={anchorElNav}
@@ -113,7 +115,6 @@ export default function ResponsiveAppBar() {
                                 ))}
                             </Menu>
                         </Box>
-
                         {/* שם האפליקציה במרכז */}
                         <Typography
                             variant="h5"
@@ -132,9 +133,9 @@ export default function ResponsiveAppBar() {
                                 display: { xs: 'none', md: 'flex' }  // מוצג רק במסכים גדולים
                             }}
                         >
+                            {/* שם האפליקציה במרכז */}
                             בית בשליטה
                         </Typography>
-
                         {/* שם האפליקציה במרכז - למסך קטן */}
                         <Typography
                             variant="h5"
@@ -151,12 +152,14 @@ export default function ResponsiveAppBar() {
                                 display: { xs: 'flex', md: 'none' }  // מוצג רק במסכים קטנים
                             }}
                         >
+                            {/* שם האפליקציה במרכז */}
                             בית בשליטה
                         </Typography>
 
                         {/* תפריט רגיל - מוצג במסכים גדולים */}
                         <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                             <Box sx={{ display: 'flex', gap: 2 }}>
+                                {/* תפריט רגיל - פריטי התפריט */}
                                 <Button
                                     component={Link}
                                     to="/"
@@ -167,6 +170,7 @@ export default function ResponsiveAppBar() {
                                 >
                                     דף הבית
                                 </Button>
+                                {/* תפריט רגיל - פריטי התפריט */}
                                 <Button
                                     component={Link}
                                     to="/income"
@@ -177,6 +181,7 @@ export default function ResponsiveAppBar() {
                                 >
                                     הכנסות
                                 </Button>
+                                {/* תפריט רגיל - פריטי התפריט */}
                                 <Button
                                     component={Link}
                                     to="/expenses"
@@ -187,6 +192,7 @@ export default function ResponsiveAppBar() {
                                 >
                                     הוצאות
                                 </Button>
+                                {/* תפריט רגיל - פריטי התפריט */}
                                 <Button
                                     component={Link}
                                     to="/income-expenses"
@@ -197,6 +203,7 @@ export default function ResponsiveAppBar() {
                                 >
                                     עובר ושב
                                 </Button>
+                                {/* תפריט רגיל - פריטי התפריט */}
                                 <Button
                                     component={Link}
                                     to="/reminders"
@@ -207,6 +214,7 @@ export default function ResponsiveAppBar() {
                                 >
                                     תזכורות
                                 </Button>
+                                {/* תפריט רגיל - פריטי התפריט */}
                                 <Button
                                     component={Link}
                                     to="/tips"

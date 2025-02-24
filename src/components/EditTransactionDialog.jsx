@@ -21,7 +21,7 @@ const categories = {
     income: ['משכורת', 'בונוס', 'השקעות', 'מתנה', 'אחר'],
     expense: ['מזון', 'דיור', 'תחבורה', 'בילויים', 'קניות', 'חשבונות', 'אחר']
 };
-
+// דילוג לעריכת עסקה    
 export default function EditTransactionDialog({ open, onClose, transaction, onSuccess }) {
     const [formData, setFormData] = useState({
         amount: '',
@@ -30,7 +30,7 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
         type: ''
     });
     const [error, setError] = useState('');
-
+    // טעינת העסקה
     useEffect(() => {
         if (transaction) {
             setFormData({
@@ -41,13 +41,13 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
             });
         }
     }, [transaction]);
-
+    // פונקציה לשמירת העסקה
     const handleSubmit = async () => {
         if (!formData.amount || !formData.description) {
             setError('נא למלא את כל השדות');
             return;
         }
-
+        // שמירת העסקה
         try {
             await updateTransaction(transaction._id, {
                 ...formData,
@@ -60,9 +60,9 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
             setError(err.message);
         }
     };
-
+    // מסך העריכת עסקה  
     if (!transaction) return null;
-
+    // מסך העריכת עסקה      
     return (
         <Dialog
             open={open}
@@ -75,16 +75,21 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
                 }
             }}
         >
+            {/* כותרת הדילוג */}
             <DialogTitle sx={{ color: '#e9d0ab' }}>
                 עריכת {transaction?.type === 'income' ? 'הכנסה' : 'הוצאה'}
             </DialogTitle>
+            {/* תוכן הדילוג */}
             <DialogContent>
+                {/* שגיאה בעריכת עסקה */}
                 {error && (
                     <Typography color="error" sx={{ mb: 2 }}>
                         {error}
                     </Typography>
                 )}
+                {/* שדות העריכה */}
                 <Stack spacing={3} sx={{ mt: 2 }}>
+                    {/* שדה הסכום */}
                     <TextField
                         label="סכום"
                         type="number"
@@ -101,6 +106,7 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
                             '& .MuiInputBase-input': { color: '#e9d0ab' }
                         }}
                     />
+                    {/* שדה התיאור */}
                     <TextField
                         label="תיאור"
                         value={formData.description}
@@ -116,6 +122,7 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
                             '& .MuiInputBase-input': { color: '#e9d0ab' }
                         }}
                     />
+                    {/* שדה התאריך */}
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
                             label="תאריך"
@@ -135,10 +142,13 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
                     </LocalizationProvider>
                 </Stack>
             </DialogContent>
+            {/* כפתורים לסגירת הדילוג ולשמירת העסקה */}
             <DialogActions>
+                {/* כפתור לביטול */}
                 <Button onClick={onClose} sx={{ color: '#e9d0ab' }}>
                     ביטול
                 </Button>
+                {/* כפתור לשמירת העסקה */}
                 <Button
                     onClick={handleSubmit}
                     variant="contained"
@@ -149,6 +159,7 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
                         }
                     }}
                 >
+                    {/* כפתור לשמירת העסקה */}
                     שמור
                 </Button>
             </DialogActions>

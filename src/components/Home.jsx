@@ -88,7 +88,7 @@ export default function Home() {
                     </Typography>
                 </Box>
             </Box>
-        </Container>
+        </Container >
     );
 }
 
