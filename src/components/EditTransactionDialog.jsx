@@ -68,11 +68,15 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
             open={open}
             onClose={onClose}
             PaperProps={{
-                sx: { minWidth: '400px' }
+                sx: {
+                    minWidth: '400px',
+                    backgroundColor: '#658285',
+                    color: '#e9d0ab'
+                }
             }}
         >
-            <DialogTitle>
-                עריכת {transaction.type === 'income' ? 'הכנסה' : 'הוצאה'}
+            <DialogTitle sx={{ color: '#e9d0ab' }}>
+                עריכת {transaction?.type === 'income' ? 'הכנסה' : 'הוצאה'}
             </DialogTitle>
             <DialogContent>
                 {error && (
@@ -87,31 +91,63 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
                         value={formData.amount}
                         onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                         fullWidth
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: '#e9d0ab' },
+                                '&:hover fieldset': { borderColor: '#e9d0ab' },
+                                '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                            },
+                            '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                            '& .MuiInputBase-input': { color: '#e9d0ab' }
+                        }}
                     />
                     <TextField
                         label="תיאור"
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         fullWidth
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: '#e9d0ab' },
+                                '&:hover fieldset': { borderColor: '#e9d0ab' },
+                                '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                            },
+                            '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                            '& .MuiInputBase-input': { color: '#e9d0ab' }
+                        }}
                     />
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
                             label="תאריך"
                             value={formData.date}
                             onChange={(newDate) => setFormData({ ...formData, date: newDate })}
-                            sx={{ width: '100%' }}
+                            sx={{
+                                width: '100%',
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': { borderColor: '#e9d0ab' },
+                                    '&:hover fieldset': { borderColor: '#e9d0ab' },
+                                    '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                                },
+                                '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                                '& .MuiInputBase-input': { color: '#e9d0ab' }
+                            }}
                         />
                     </LocalizationProvider>
                 </Stack>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="inherit">
+                <Button onClick={onClose} sx={{ color: '#e9d0ab' }}>
                     ביטול
                 </Button>
                 <Button
                     onClick={handleSubmit}
                     variant="contained"
-                    color={transaction.type === 'income' ? 'success' : 'error'}
+                    sx={{
+                        backgroundColor: transaction?.type === 'income' ? '#4caf50' : '#f44336',
+                        '&:hover': {
+                            backgroundColor: transaction?.type === 'income' ? '#388e3c' : '#d32f2f'
+                        }
+                    }}
                 >
                     שמור
                 </Button>

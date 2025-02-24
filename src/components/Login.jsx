@@ -32,9 +32,13 @@ export default function Login(props) {
     }
     // מסך ההתחברות
     return (
-        <Box sx={{ padding: '8px' }}>
+        <Box sx={{
+            padding: '8px',
+            backgroundColor: '#658285',
+            borderRadius: '8px'
+        }}>
             <Stack spacing={1}>
-                {error && <Typography variant='h6' color='error'>
+                {error && <Typography variant='h6' sx={{ color: '#f44336' }}>
                     {error}
                 </Typography>}
                 <TextField
@@ -44,8 +48,16 @@ export default function Login(props) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={loading}
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            '& fieldset': { borderColor: '#e9d0ab' },
+                            '&:hover fieldset': { borderColor: '#e9d0ab' },
+                            '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                        },
+                        '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                        '& .MuiInputBase-input': { color: '#e9d0ab' }
+                    }}
                 />
-                {/* שדה סיסמה */}
                 <TextField
                     label="Password"
                     variant="outlined"
@@ -54,36 +66,58 @@ export default function Login(props) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={loading}
+                    sx={{
+                        '& .MuiOutlinedInput-root': {
+                            '& fieldset': { borderColor: '#e9d0ab' },
+                            '&:hover fieldset': { borderColor: '#e9d0ab' },
+                            '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                        },
+                        '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                        '& .MuiInputBase-input': { color: '#e9d0ab' }
+                    }}
                 />
-                {/* כפתור גוגל */}
                 <Button
                     startIcon={<GoogleIcon />}
                     variant="contained"
-                    size="small">
+                    size="small"
+                    sx={{
+                        backgroundColor: '#e9d0ab',
+                        color: '#658285',
+                        '&:hover': { backgroundColor: '#d4b78c' }
+                    }}
+                >
                     Google
                 </Button>
-                {/* כפתור התחברות */}
                 <Button
                     startIcon={<LoginIcon />}
                     variant="contained"
                     size="small"
                     onClick={handleLogin}
                     disabled={loading}
+                    sx={{
+                        backgroundColor: '#e9d0ab',
+                        color: '#658285',
+                        '&:hover': { backgroundColor: '#d4b78c' }
+                    }}
                 >
                     Login
                 </Button>
-                {/* כפתור הרשמה */}
                 <Button
                     startIcon={<PersonIcon />}
                     variant="contained"
                     size="small"
                     onClick={props.openRegister}
                     disabled={loading}
+                    sx={{
+                        backgroundColor: '#e9d0ab',
+                        color: '#658285',
+                        '&:hover': { backgroundColor: '#d4b78c' }
+                    }}
                 >
                     Register
                 </Button>
             </Stack>
-        </Box >
+        </Box>
     )
 }
 

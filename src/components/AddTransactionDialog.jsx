@@ -67,10 +67,14 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
             open={open}
             onClose={onClose}
             PaperProps={{
-                sx: { minWidth: '400px' }
+                sx: {
+                    minWidth: '400px',
+                    backgroundColor: '#658285',
+                    color: '#e9d0ab'
+                }
             }}
         >
-            <DialogTitle>
+            <DialogTitle sx={{ color: '#e9d0ab' }}>
                 {type === 'income' ? 'הוספת הכנסה' : 'הוספת הוצאה'}
             </DialogTitle>
             <DialogContent>
@@ -86,12 +90,30 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
                         value={formData.amount}
                         onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                         fullWidth
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: '#e9d0ab' },
+                                '&:hover fieldset': { borderColor: '#e9d0ab' },
+                                '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                            },
+                            '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                            '& .MuiInputBase-input': { color: '#e9d0ab' }
+                        }}
                     />
                     <TextField
                         label="תיאור"
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         fullWidth
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: '#e9d0ab' },
+                                '&:hover fieldset': { borderColor: '#e9d0ab' },
+                                '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                            },
+                            '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                            '& .MuiInputBase-input': { color: '#e9d0ab' }
+                        }}
                     />
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
@@ -104,13 +126,21 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
                 </Stack>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="inherit">
+                <Button
+                    onClick={onClose}
+                    sx={{ color: '#e9d0ab' }}
+                >
                     ביטול
                 </Button>
                 <Button
                     onClick={handleSubmit}
                     variant="contained"
-                    color={type === 'income' ? 'success' : 'error'}
+                    sx={{
+                        backgroundColor: type === 'income' ? '#4caf50' : '#f44336',
+                        '&:hover': {
+                            backgroundColor: type === 'income' ? '#388e3c' : '#d32f2f'
+                        }
+                    }}
                 >
                     הוסף
                 </Button>

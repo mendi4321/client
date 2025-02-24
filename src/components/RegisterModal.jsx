@@ -80,8 +80,10 @@ export default function RegisterModal(props) {
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
                 width: '400px',
-                bgcolor: 'background.paper',
+                bgcolor: '#658285',
                 boxShadow: 24,
+                borderRadius: '8px',
+                p: 4
             }}>
                 <Stack spacing={2}>
                     <TextField
@@ -95,6 +97,15 @@ export default function RegisterModal(props) {
                         error={!!error.firstName}
                         helperText={error.firstname || null}
                         disabled={Loaging}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: '#e9d0ab' },
+                                '&:hover fieldset': { borderColor: '#e9d0ab' },
+                                '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                            },
+                            '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                            '& .MuiInputBase-input': { color: '#e9d0ab' }
+                        }}
                     />
                     <TextField
                         required
@@ -107,6 +118,15 @@ export default function RegisterModal(props) {
                         error={!!error.lastName}
                         helperText={error.lastname || null}
                         disabled={Loaging}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: '#e9d0ab' },
+                                '&:hover fieldset': { borderColor: '#e9d0ab' },
+                                '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                            },
+                            '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                            '& .MuiInputBase-input': { color: '#e9d0ab' }
+                        }}
                     />
                     <TextField
                         required
@@ -119,6 +139,15 @@ export default function RegisterModal(props) {
                         error={!!error.email}
                         helperText={error.email || null}
                         disabled={Loaging}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: '#e9d0ab' },
+                                '&:hover fieldset': { borderColor: '#e9d0ab' },
+                                '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                            },
+                            '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                            '& .MuiInputBase-input': { color: '#e9d0ab' }
+                        }}
                     />
                     <BirthDatePicker
                         value={userInfo.birthday || null}
@@ -138,6 +167,15 @@ export default function RegisterModal(props) {
                         error={!!error.password}
                         helperText={error.password || null}
                         disabled={Loaging}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: '#e9d0ab' },
+                                '&:hover fieldset': { borderColor: '#e9d0ab' },
+                                '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                            },
+                            '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                            '& .MuiInputBase-input': { color: '#e9d0ab' }
+                        }}
                     />
                     <TextField
                         required
@@ -151,6 +189,15 @@ export default function RegisterModal(props) {
                         error={!!error.confirmPassword}
                         helperText={error.confirmPassword || null}
                         disabled={Loaging}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: '#e9d0ab' },
+                                '&:hover fieldset': { borderColor: '#e9d0ab' },
+                                '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                            },
+                            '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                            '& .MuiInputBase-input': { color: '#e9d0ab' }
+                        }}
                     />
                     {/* <TextField
                         required
@@ -163,15 +210,24 @@ export default function RegisterModal(props) {
                         error={!!error.googleId}
                         helperText={error.googleId || null}
                     /> */}
-                    <Button variant='contained' size='small'
+                    <Button
+                        variant='contained'
+                        size='small'
                         onClick={onRegisterClick}
                         disabled={Loaging}
+                        sx={{
+                            backgroundColor: '#e9d0ab',
+                            color: '#658285',
+                            '&:hover': { backgroundColor: '#d4b78c' }
+                        }}
                     >
                         Register
                     </Button>
-                    {serverError && <Typography variant='h6' color='error'>
-                        {serverError}
-                    </Typography>}
+                    {serverError && (
+                        <Typography variant='h6' sx={{ color: '#f44336' }}>
+                            {serverError}
+                        </Typography>
+                    )}
                 </Stack>
             </Box>
         </Modal>
