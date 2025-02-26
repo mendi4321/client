@@ -21,13 +21,28 @@ const categories = {
     income: ['משכורת', 'בונוס', 'השקעות', 'מתנה', 'אחר'],
     expense: ['מזון', 'דיור', 'תחבורה', 'בילויים', 'קניות', 'חשבונות', 'אחר']
 };
+
+// הוספת הקטגוריות
+const expenseCategories = [
+    'מזון',
+    'דיור',
+    'תחבורה',
+    'בילויים',
+    'קניות',
+    'חשבונות',
+    'בריאות',
+    'חינוך',
+    'אחר'
+];
+
 // דילוג לעריכת עסקה    
 export default function EditTransactionDialog({ open, onClose, transaction, onSuccess }) {
     const [formData, setFormData] = useState({
         amount: '',
         description: '',
         date: dayjs(),
-        type: ''
+        type: '',
+        category: ''
     });
     const [error, setError] = useState('');
     // טעינת העסקה
@@ -37,20 +52,22 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
                 amount: transaction.amount,
                 description: transaction.description,
                 date: dayjs(transaction.date),
-                type: transaction.type
+                type: transaction.type,
+                category: transaction.category || ''
             });
         }
     }, [transaction]);
     // פונקציה לשמירת העסקה
     const handleSubmit = async () => {
-        if (!formData.amount || !formData.description) {
-            setError('נא למלא את כל השדות');
+        if (!formData.amount) {
+            setError('נא להזין סכום');
             return;
         }
-        // שמירת העסקה
+
         try {
             await updateTransaction(transaction._id, {
                 ...formData,
+                description: formData.description || '',
                 date: formData.date.toISOString()
             });
             onSuccess();
@@ -140,6 +157,31 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
                             }}
                         />
                     </LocalizationProvider>
+                    {/* שדה הקטגוריה */}
+                    {transaction?.type === 'expense' && (
+                        <TextField
+                            select
+                            label="קטגוריה"
+                            value={formData.category}
+                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                            fullWidth
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': { borderColor: '#e9d0ab' },
+                                    '&:hover fieldset': { borderColor: '#e9d0ab' },
+                                    '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                                },
+                                '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                                '& .MuiInputBase-input': { color: '#e9d0ab' }
+                            }}
+                        >
+                            {expenseCategories.map((option) => (
+                                <MenuItem key={option} value={option}>
+                                    {option}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    )}
                 </Stack>
             </DialogContent>
             {/* כפתורים לסגירת הדילוג ולשמירת העסקה */}

@@ -3,7 +3,7 @@ import { BASE_URL } from './constance';//קביעת הבסיס של השרת
 // פונקציה שמחזירה את ההגדרות הבסיסיות לכל בקשה
 const getHeaders = () => ({
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('token')}`
+    'Authorization': `Bearer ${localStorage.getItem('user-token')}`
 });
 
 // קבלת כל התזכורות
@@ -12,12 +12,15 @@ export async function getReminders() {
         const response = await fetch(BASE_URL + 'reminders', {
             headers: getHeaders()
         });
+
         if (!response.ok) {
-            throw new Error('שגיאה בקבלת תזכורות');
+            const errorData = await response.json();
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
+
         return await response.json();
     } catch (error) {
-        console.error('שגיאה בקבלת תזכורות:', error);
+        console.error('Error fetching reminders:', error);
         throw error;
     }
 }
@@ -63,14 +66,20 @@ export async function deleteReminder(id) {
     try {
         const response = await fetch(BASE_URL + 'reminders/' + id, {
             method: 'DELETE',
-            headers: getHeaders()
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('user-token')}`
+            }
         });
+
         if (!response.ok) {
-            throw new Error('שגיאה במחיקת תזכורת');
+            const errorData = await response.json();
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
+
         return await response.json();
     } catch (error) {
-        console.error('שגיאה במחיקת תזכורת:', error);
+        console.error('Error deleting reminder:', error);
         throw error;
     }
 }

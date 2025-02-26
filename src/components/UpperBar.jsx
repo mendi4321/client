@@ -157,74 +157,21 @@ export default function ResponsiveAppBar() {
                         </Typography>
 
                         {/* תפריט רגיל - מוצג במסכים גדולים */}
-                        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+                        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, justifyContent: 'flex-end', flexDirection: 'row' }}>
                             <Box sx={{ display: 'flex', gap: 2 }}>
-                                {/* תפריט רגיל - פריטי התפריט */}
-                                <Button
-                                    component={Link}
-                                    to="/"
-                                    sx={{
-                                        color: '#e9d0ab',
-                                        '&:hover': { backgroundColor: 'rgba(233, 208, 171, 0.1)' }
-                                    }}
-                                >
-                                    דף הבית
-                                </Button>
-                                {/* תפריט רגיל - פריטי התפריט */}
-                                <Button
-                                    component={Link}
-                                    to="/income"
-                                    sx={{
-                                        color: '#e9d0ab',
-                                        '&:hover': { backgroundColor: 'rgba(233, 208, 171, 0.1)' }
-                                    }}
-                                >
-                                    הכנסות
-                                </Button>
-                                {/* תפריט רגיל - פריטי התפריט */}
-                                <Button
-                                    component={Link}
-                                    to="/expenses"
-                                    sx={{
-                                        color: '#e9d0ab',
-                                        '&:hover': { backgroundColor: 'rgba(233, 208, 171, 0.1)' }
-                                    }}
-                                >
-                                    הוצאות
-                                </Button>
-                                {/* תפריט רגיל - פריטי התפריט */}
-                                <Button
-                                    component={Link}
-                                    to="/income-expenses"
-                                    sx={{
-                                        color: '#e9d0ab',
-                                        '&:hover': { backgroundColor: 'rgba(233, 208, 171, 0.1)' }
-                                    }}
-                                >
-                                    עובר ושב
-                                </Button>
-                                {/* תפריט רגיל - פריטי התפריט */}
-                                <Button
-                                    component={Link}
-                                    to="/reminders"
-                                    sx={{
-                                        color: '#e9d0ab',
-                                        '&:hover': { backgroundColor: 'rgba(233, 208, 171, 0.1)' }
-                                    }}
-                                >
-                                    תזכורות
-                                </Button>
-                                {/* תפריט רגיל - פריטי התפריט */}
-                                <Button
-                                    component={Link}
-                                    to="/tips"
-                                    sx={{
-                                        color: '#e9d0ab',
-                                        '&:hover': { backgroundColor: 'rgba(233, 208, 171, 0.1)' }
-                                    }}
-                                >
-                                    טיפים
-                                </Button>
+                                {pages.map((page) => (
+                                    <Button
+                                        key={page.name}
+                                        component={Link}
+                                        to={page.path}
+                                        sx={{
+                                            color: '#e9d0ab',
+                                            '&:hover': { backgroundColor: 'rgba(233, 208, 171, 0.1)' }
+                                        }}
+                                    >
+                                        {page.name}
+                                    </Button>
+                                ))}
                             </Box>
                         </Box>
 

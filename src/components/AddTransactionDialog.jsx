@@ -15,12 +15,28 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { addTransaction } from '../api/transactionApi';
 import dayjs from 'dayjs';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { styled, alpha } from '@mui/material/styles';
 
 // הגדרת הקטגוריות לפי סוג העסקה
 const categories = {
     income: ['משכורת', 'בונוס', 'השקעות', 'מתנה', 'אחר'],
     expense: ['מזון', 'דיור', 'תחבורה', 'בילויים', 'קניות', 'חשבונות', 'אחר']
 };
+
+// הגדרת הקטגוריות להוצאות
+const expenseCategories = [
+    'מזון',
+    'דיור',
+    'תחבורה',
+    'בילויים',
+    'קניות',
+    'חשבונות',
+    'בריאות',
+    'חינוך',
+    'אחר'
+];
+
 // דילוג להוספת עסקה    
 export default function AddTransactionDialog({ open, onClose, type, onSuccess }) {
     const [formData, setFormData] = useState({
@@ -30,6 +46,7 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
         type: type
     });
     const [error, setError] = useState('');
+    const [category, setCategory] = useState('');
     // טעינת הסוג של העסקה
     useEffect(() => {
         setFormData(prev => ({
@@ -39,14 +56,16 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
     }, [type]);
     // פונקציה לשמירת העסקה
     const handleSubmit = async () => {
-        if (!formData.amount || !formData.description) {
-            setError('נא למלא את כל השדות');
+        if (!formData.amount) {
+            setError('נא להזין סכום');
             return;
         }
         try {
             await addTransaction({
                 ...formData,
                 type: type,
+                category: type === 'expense' ? category : null,
+                description: formData.description || '',
                 date: formData.date.toISOString()
             });
             onSuccess();
@@ -57,6 +76,7 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
                 date: dayjs(),
                 type: type
             });
+            setCategory('');
             setError('');
         } catch (err) {
             setError(err.message);
@@ -74,13 +94,18 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
                     color: '#e9d0ab'
                 }
             }}
+            aria-labelledby="transaction-dialog-title"
+            aria-describedby="transaction-dialog-description"
         >
-            {/* כותרת הדילוג */}
-            <DialogTitle sx={{ color: '#e9d0ab' }}>
+            <DialogTitle
+                id="transaction-dialog-title"
+                sx={{ color: '#e9d0ab' }}
+            >
                 {type === 'income' ? 'הוספת הכנסה' : 'הוספת הוצאה'}
             </DialogTitle>
-            {/* תוכן הדילוג */}
-            <DialogContent>
+            <DialogContent
+                id="transaction-dialog-description"
+            >
                 {/* שגיאה בהוספת עסקה */}
                 {error && (
                     <Typography color="error" sx={{ mb: 2 }}>
@@ -96,6 +121,7 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
                         value={formData.amount}
                         onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                         fullWidth
+                        required
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 '& fieldset': { borderColor: '#e9d0ab' },
@@ -131,20 +157,44 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
                             sx={{ width: '100%' }}
                         />
                     </LocalizationProvider>
+                    {type === 'expense' && (
+                        <TextField
+                            select
+                            label="קטגוריה"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            fullWidth
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': { borderColor: '#e9d0ab' },
+                                    '&:hover fieldset': { borderColor: '#e9d0ab' },
+                                    '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                                },
+                                '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                                '& .MuiInputBase-input': { color: '#e9d0ab' }
+                            }}
+                        >
+                            {expenseCategories.map((option) => (
+                                <MenuItem key={option} value={option}>
+                                    {option}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    )}
                 </Stack>
             </DialogContent>
             {/* כפתורים לסגירת הדילוג ולשמירת העסקה */}
             <DialogActions>
-                {/* כפתור לביטול */}
                 <Button
                     onClick={onClose}
+                    aria-label="ביטול"
                     sx={{ color: '#e9d0ab' }}
                 >
                     ביטול
                 </Button>
-                {/* כפתור לשמירת העסקה */}
                 <Button
                     onClick={handleSubmit}
+                    aria-label={`הוסף ${type === 'income' ? 'הכנסה' : 'הוצאה'}`}
                     variant="contained"
                     sx={{
                         backgroundColor: type === 'income' ? '#4caf50' : '#f44336',
@@ -153,7 +203,6 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
                         }
                     }}
                 >
-                    {/* כפתור לשמירת העסקה */}
                     הוסף
                 </Button>
             </DialogActions>

@@ -7,14 +7,17 @@ import {
     TextField,
     Stack,
     IconButton,
-    List,
-    ListItem,
-    ListItemText,
     Container,
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions
+    DialogActions,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -44,7 +47,7 @@ export default function Reminders() {
         try {
             const response = await fetch(BASE_URL + 'reminders', {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('user-token')}`
                 }
             });
             if (!response.ok) {
@@ -70,7 +73,7 @@ export default function Reminders() {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('user-token')}`
                 },
                 body: JSON.stringify({
                     title: formData.title,
@@ -97,7 +100,7 @@ export default function Reminders() {
             const response = await fetch(BASE_URL + 'reminders/' + id, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${localStorage.getItem('user-token')}`
                 }
             });
             if (!response.ok) {
@@ -133,7 +136,7 @@ export default function Reminders() {
         <Container maxWidth="md">
             <Box sx={{ mt: 4, mb: 4 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-                    <Typography variant="h4" component="h1">
+                    <Typography variant="h4" component="h1" sx={{ color: '#658285' }}>
                         תזכורות לתשלומים
                     </Typography>
                     {/* כפתור להוספת תזכורת */}
@@ -149,60 +152,60 @@ export default function Reminders() {
                         תזכורת חדשה
                     </Button>
                 </Stack>
-                {/* רשימת התזכורות */}
-                <List>
-                    {reminders.map((reminder) => (
-                        <Paper
-                            key={reminder._id}
-                            elevation={2}
-                            sx={{ mb: 2, borderRadius: 2 }}
-                        >
-                            {/* רשימת התזכורות */}
-                            <ListItem
-                                secondaryAction={
-                                    <Stack direction="row" spacing={1}>
-                                        {/* כפתור לעריכת התזכורת */}
-                                        <IconButton onClick={() => handleEdit(reminder)}>
+
+                {/* טבלת תזכורות - במקום הרשימה */}
+                <TableContainer
+                    component={Paper}
+                    sx={{
+                        backgroundColor: '#658285',
+                        mb: 3,
+                        borderRadius: 2,
+                        height: '50vh',
+                    }}
+                >
+                    <Table>
+                        <TableHead sx={{ position: 'sticky', top: 0, backgroundColor: '#658285', zIndex: 1 }}>
+                            <TableRow >
+                                <TableCell sx={{ color: '#e9d0ab', fontWeight: 'bold' }}>כותרת</TableCell>
+                                <TableCell sx={{ color: '#e9d0ab', fontWeight: 'bold' }}>סכום</TableCell>
+                                <TableCell sx={{ color: '#e9d0ab', fontWeight: 'bold' }}>תאריך</TableCell>
+                                <TableCell sx={{ color: '#e9d0ab', fontWeight: 'bold' }}>פעולות</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody sx={{ backgroundColor: '#e9d0ab' }}>
+                            {reminders.map((reminder) => (
+                                <TableRow key={reminder._id}>
+                                    <TableCell>{reminder.title}</TableCell>
+                                    <TableCell>₪{Number(reminder.amount).toLocaleString()}</TableCell>
+                                    <TableCell>{new Date(reminder.dueDate).toLocaleDateString('he-IL')}</TableCell>
+                                    <TableCell>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleEdit(reminder)}
+                                            sx={{ mr: 1 }}
+                                        >
                                             <EditIcon />
                                         </IconButton>
-                                        {/* כפתור למחיקת התזכורת */}
                                         <IconButton
+                                            size="small"
+                                            color="error"
                                             onClick={() => handleDelete(reminder._id)}
-                                            sx={{ color: '#d32f2f' }}
                                         >
                                             <DeleteIcon />
                                         </IconButton>
-                                    </Stack>
-                                }
-                            >
-                                {/* רשימת התזכורות */}
-                                <ListItemText
-                                    primary={
-                                        <Typography variant="h6" component="div">
-                                            {reminder.title}
-                                        </Typography>
-                                    }
-                                    secondary={
-                                        <Typography component="div" variant="body2" color="text.secondary">
-                                            <Typography component="div" variant="body1" color="primary">
-                                                ₪{reminder.amount}
-                                            </Typography>
-                                            <Typography component="div" variant="body2">
-                                                תאריך: {new Date(reminder.dueDate).toLocaleDateString('he-IL')}
-                                            </Typography>
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                        </Paper>
-                    ))}
-                </List>
-                {/* דילוג להוספת תזכורת */}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+
+                {/* דיאלוג להוספת תזכורת */}
                 <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
                     <DialogTitle>
                         {selectedReminder ? 'עריכת תזכורת' : 'תזכורת חדשה'}
                     </DialogTitle>
-                    {/* תוכן הדילוג */}
+                    {/* תוכן הדיאלוג */}
                     <DialogContent>
                         <Stack spacing={3} sx={{ mt: 2 }}>
                             <TextField
@@ -228,11 +231,9 @@ export default function Reminders() {
                             </LocalizationProvider>
                         </Stack>
                     </DialogContent>
-                    {/* כפתורים לסגירת הדילוג ולשמירת התזכורת */}
+                    {/* כפתורים לסגירת הדיאלוג ולשמירת התזכורת */}
                     <DialogActions>
-                        {/* כפתור לביטול */}
                         <Button onClick={handleCloseDialog}>ביטול</Button>
-                        {/* כפתור לשמירת התזכורת */}
                         <Button
                             onClick={handleSubmit}
                             variant="contained"
