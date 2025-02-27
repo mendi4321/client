@@ -14,29 +14,42 @@ export async function getTransactions() {
 }
 //  פונקציה להוספת עסקה חדשה
 export async function addTransaction(transaction) {
-    const userData = JSON.parse(localStorage.getItem('user-data'));
-
-    const transactionWithUserId = {
-        ...transaction,
-        userId: userData.id,
-        category: transaction.category  // וידוא שהקטגוריה נשלחת
-    };
-
-    const response = await fetch(BASE_URL + 'transactions', {
-        method: "POST",
-        body: JSON.stringify(transactionWithUserId),
-        headers: {
-            "Content-Type": "application/json",
-            'Authorization': `Bearer ${localStorage.getItem('user-token')}`
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to add transaction');
+    try {
+        const userData = JSON.parse(localStorage.getItem('user-data'));
+        // בדיקת האם יש משתמש מחובר
+        if (!userData || !userData.id) {
+            throw new Error('נתוני המשתמש חסרים. אנא התחבר מחדש.');
+        }
+        // בדיקת קטגוריה רק אם זו הוצאה
+        if (transaction.type === 'expense' && !transaction.category) {
+            throw new Error('נא הוסף קטגוריה');
+        }
+        // יצירת עסקה עם מזהה משתמש
+        const transactionWithUserId = {
+            ...transaction,
+            userId: userData.id
+        };
+        // שליחת העסקה לשרת 
+        const response = await fetch(BASE_URL + 'transactions', {
+            method: "POST",
+            body: JSON.stringify(transactionWithUserId),
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': `Bearer ${localStorage.getItem('user-token')}`
+            },
+        });
+        // בדיקת האם ההודעה נשלחה בהצלחה
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server error response:', errorText);
+            throw new Error(`שגיאת שרת: ${response.status} - ${errorText || response.statusText}`);
+        }
+        // קבלת הנתונים מהשרת
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        throw error;
     }
-
-    const data = await response.json();
-    return data;
 }
 //  פונקציה למחיקת עסקה לפי ID
 export async function deleteTransaction(transactionId) {

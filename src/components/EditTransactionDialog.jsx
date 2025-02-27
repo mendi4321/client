@@ -91,6 +91,7 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
                     color: '#e9d0ab'
                 }
             }}
+            aria-modal="true"
         >
             {/* כותרת הדילוג */}
             <DialogTitle sx={{ color: '#e9d0ab' }}>

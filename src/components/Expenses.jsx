@@ -17,31 +17,100 @@ import {
     DialogContent,
     DialogContentText,
     DialogActions,
+    ToggleButtonGroup,
+    ToggleButton,
+    MenuItem,
+    Select,
+    FormControl,
+    InputLabel
 } from '@mui/material';
 import RemoveIcon from '@mui/icons-material/Remove';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CategoryIcon from '@mui/icons-material/Category';
+import CalendarViewDayIcon from '@mui/icons-material/CalendarViewDay';
+import ViewWeekIcon from '@mui/icons-material/ViewWeek';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { getTransactions, deleteTransaction } from "../api/transactionApi";
 import AddTransactionDialog from './AddTransactionDialog';
 import EditTransactionDialog from './EditTransactionDialog';
 import { PieChart } from '@mui/x-charts/PieChart';
+import dayjs from 'dayjs';
+import ExpensesChart from './ExpensesChart';
+import { convertCurrency } from '../api/currencyApi';
 
 // מסך ההוצאות  
 export default function Expenses() {
     const [transactions, setTransactions] = useState([]);
+    const [filteredTransactions, setFilteredTransactions] = useState([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [editTransaction, setEditTransaction] = useState(null);
     const [error, setError] = useState('');
+    const [dateRange, setDateRange] = useState('month'); // אפשרויות: day, week, month, year
     const [deleteDialog, setDeleteDialog] = useState({
         open: false,
         transactionId: null
     });
+    const [selectedCurrency, setSelectedCurrency] = useState('ILS');
+    const [convertedAmounts, setConvertedAmounts] = useState({});
+    const [convertedTotal, setConvertedTotal] = useState(0);
+
+    // העברנו את הפונקציה למעלה
+    const getCurrencySymbol = (currencyCode) => {
+        switch (currencyCode) {
+            case 'ILS': return '₪';
+            case 'USD': return '$';
+            case 'EUR': return '€';
+            default: return currencyCode;
+        }
+    };
+
+    // העברנו את חישוב סך ההוצאות למעלה
+    const totalExpenses = filteredTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+
+    const currencies = [
+        { value: 'ILS', label: '₪ (שקל)' },
+        { value: 'USD', label: '$ (דולר)' },
+        { value: 'EUR', label: '€ (אירו)' }
+    ];
 
     // טעינת ההוצאות
     useEffect(() => {
         loadTransactions();
     }, []);
+
+    // סינון עסקאות לפי טווח זמן
+    useEffect(() => {
+        filterTransactionsByDateRange();
+    }, [transactions, dateRange]);
+
+    // המרת סכומים כאשר המטבע משתנה
+    useEffect(() => {
+        const convertAmounts = async () => {
+            if (selectedCurrency === 'ILS') {
+                setConvertedTotal(totalExpenses);
+                setConvertedAmounts({});
+                return;
+            }
+
+            try {
+                const converted = {};
+                for (const transaction of filteredTransactions) {
+                    const amount = await convertCurrency(Number(transaction.amount), 'ILS', selectedCurrency);
+                    converted[transaction._id] = amount;
+                }
+                setConvertedAmounts(converted);
+
+                const total = await convertCurrency(totalExpenses, 'ILS', selectedCurrency);
+                setConvertedTotal(total);
+            } catch (error) {
+                console.error('Error converting amounts:', error);
+            }
+        };
+
+        convertAmounts();
+    }, [selectedCurrency, filteredTransactions, totalExpenses]);
 
     // טעינת ההוצאות
     const loadTransactions = async () => {
@@ -55,13 +124,54 @@ export default function Expenses() {
         }
     };
 
-    // סינון רק של ההוצאות      
-    const totalExpenses = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
+    // פונקציה לסינון עסקאות לפי טווח הזמן שנבחר
+    const filterTransactionsByDateRange = () => {
+        const now = dayjs();
+        let filtered;
 
-    // חישוב סכומים לפי קטגוריות
-    const expensesByCategory = transactions.reduce((acc, transaction) => {
+        switch (dateRange) {
+            case 'day':
+                // סינון עסקאות מהיום
+                filtered = transactions.filter(t =>
+                    dayjs(t.date).format('DD/MM/YYYY') === now.format('DD/MM/YYYY')
+                );
+                break;
+            case 'week':
+                // סינון עסקאות מהשבוע האחרון
+                const weekStart = now.subtract(7, 'day');
+                filtered = transactions.filter(t =>
+                    dayjs(t.date).isAfter(weekStart) || dayjs(t.date).isSame(weekStart, 'day')
+                );
+                break;
+            case 'month':
+                // סינון עסקאות מהחודש האחרון
+                const monthStart = now.subtract(30, 'day');
+                filtered = transactions.filter(t =>
+                    dayjs(t.date).isAfter(monthStart) || dayjs(t.date).isSame(monthStart, 'day')
+                );
+                break;
+            case 'year':
+                // סינון עסקאות מהשנה האחרונה
+                const yearStart = now.subtract(365, 'day');
+                filtered = transactions.filter(t =>
+                    dayjs(t.date).isAfter(yearStart) || dayjs(t.date).isSame(yearStart, 'day')
+                );
+                break;
+            default:
+                filtered = transactions;
+                break;
+        }
+
+        setFilteredTransactions(filtered);
+    };
+
+    // חישוב סכומים לפי קטגוריות עם המרת מטבע
+    const expensesByCategory = filteredTransactions.reduce((acc, transaction) => {
         const category = transaction.category || 'אחר';
-        acc[category] = (acc[category] || 0) + Number(transaction.amount);
+        const amount = selectedCurrency === 'ILS'
+            ? Number(transaction.amount)
+            : convertedAmounts[transaction._id] || Number(transaction.amount);
+        acc[category] = (acc[category] || 0) + amount;
         return acc;
     }, {});
 
@@ -69,7 +179,7 @@ export default function Expenses() {
     const pieChartData = Object.entries(expensesByCategory).map(([category, amount], index) => ({
         id: index,
         value: amount,
-        label: category,
+        label: `${category}: ${getCurrencySymbol(selectedCurrency)}${amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
         color: [
             '#f44336', // אדום
             '#ff9800', // כתום
@@ -104,6 +214,22 @@ export default function Expenses() {
         }
     };
 
+    // פונקציה שמחזירה את טווח הזמן שנבחר לתצוגה בעברית
+    function dateRangeToDisplay() {
+        switch (dateRange) {
+            case 'day':
+                return 'היום';
+            case 'week':
+                return 'שבוע אחרון';
+            case 'month':
+                return 'חודש אחרון';
+            case 'year':
+                return 'שנה אחרונה';
+            default:
+                return '';
+        }
+    }
+
     // מסך ההוצאות
     return (
         <Box sx={{
@@ -112,13 +238,30 @@ export default function Expenses() {
             flexDirection: 'column',
             alignItems: 'center',
             width: '100%',
-            // height: '20%',
         }}>
             {error && (
                 <Typography color="error" sx={{ mb: 2 }}>
                     {error}
                 </Typography>
             )}
+            {/* בחירת מטבע */}
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+                <FormControl sx={{ minWidth: 120 }}>
+                    <InputLabel>מטבע</InputLabel>
+                    <Select
+                        value={selectedCurrency}
+                        onChange={(e) => setSelectedCurrency(e.target.value)}
+                        label="מטבע"
+                    >
+                        {currencies.map((currency) => (
+                            <MenuItem key={currency.value} value={currency.value}>
+                                {currency.label}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </Box>
+
             {/* כותרת ההוצאות */}
             <Paper sx={{
                 p: 2, mb: 4,
@@ -127,9 +270,10 @@ export default function Expenses() {
                 borderRadius: '10px',
                 width: '50%',
             }}>
-                <Typography variant="h6">סך כל ההוצאות</Typography>
+                <Typography variant="h6">סך הוצאות ({dateRangeToDisplay()})</Typography>
                 <Typography variant="h4" sx={{ my: 2 }}>
-                    ₪{totalExpenses.toLocaleString()}
+                    {getCurrencySymbol(selectedCurrency)}
+                    {convertedTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                 </Typography>
                 <Button
                     variant="contained"
@@ -143,6 +287,40 @@ export default function Expenses() {
                     הוסף הוצאה
                 </Button>
             </Paper>
+
+            {/* טווח זמן לסינון */}
+            <Box sx={{ color: '#658285', p: 2, mb: 3, textAlign: 'center' }}>
+                <Typography variant="h6" gutterBottom>
+                    בחר טווח זמן להצגת נתונים
+                </Typography>
+                <ToggleButtonGroup
+                    value={dateRange}
+                    exclusive
+                    onChange={(e, newValue) => {
+                        if (newValue) setDateRange(newValue);
+                    }}
+                    aria-label="טווח זמן"
+                    sx={{ mt: 1 }}
+                >
+                    <ToggleButton value="day" aria-label="יום">
+                        <CalendarViewDayIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                        יום
+                    </ToggleButton>
+                    <ToggleButton value="week" aria-label="שבוע">
+                        <ViewWeekIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                        שבוע
+                    </ToggleButton>
+                    <ToggleButton value="month" aria-label="חודש">
+                        <DateRangeIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                        חודש
+                    </ToggleButton>
+                    <ToggleButton value="year" aria-label="שנה">
+                        <CalendarMonthIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                        שנה
+                    </ToggleButton>
+                </ToggleButtonGroup>
+            </Box>
+
             {/* טבלת ההוצאות */}
             <TableContainer component={Paper}
                 sx={{
@@ -160,16 +338,18 @@ export default function Expenses() {
                             <TableCell sx={{ color: '#e9d0ab' }}>פעולות</TableCell>
                         </TableRow>
                     </TableHead>
-                    <TableBody>
-                        {transactions.map((transaction) => (
-                            <TableRow key={transaction._id}
-                                sx={{
-                                    backgroundColor: '#e9d0ab',
-                                }}
-                            >
+                    <TableBody sx={{ backgroundColor: '#e9d0ab' }}>
+                        {filteredTransactions.map((transaction) => (
+                            <TableRow key={transaction._id}>
                                 <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
                                 <TableCell>{transaction.description}</TableCell>
-                                <TableCell>₪{Number(transaction.amount).toLocaleString()}</TableCell>
+                                <TableCell>
+                                    {getCurrencySymbol(selectedCurrency)}
+                                    {(selectedCurrency === 'ILS'
+                                        ? Number(transaction.amount)
+                                        : convertedAmounts[transaction._id] || Number(transaction.amount)
+                                    ).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                </TableCell>
                                 <TableCell>
                                     <Stack direction="row" alignItems="center" spacing={1}>
                                         <CategoryIcon sx={{ color: '#658285', fontSize: 20 }} />
@@ -197,6 +377,73 @@ export default function Expenses() {
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            {/* אזור התרשימים - עוגה וגרף קו */}
+            <Box sx={{
+                mt: 4,
+                width: '100%',
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },  // טור במובייל, שורה במסך רגיל
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                gap: 3
+            }}>
+                {/* תרשים עוגה */}
+                <Box sx={{
+                    width: { xs: '100%', md: '50%' },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                }}>
+                    <Typography
+                        variant="h6"
+                        align="center"
+                        sx={{
+                            mb: 2,
+                            color: '#658285',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        התפלגות הוצאות לפי קטגוריות ({dateRangeToDisplay()})
+                    </Typography>
+                    <Box sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        backgroundColor: 'transparent'
+                    }}>
+                        <PieChart
+                            series={[
+                                {
+                                    data: pieChartData,
+                                    highlightScope: { faded: 'global', highlighted: 'item' },
+                                    arcLabel: (item) => `${item.label}: ${item.value.toLocaleString()} ₪`,
+                                },
+                            ]}
+                            width={350}
+                            height={350}
+                            sx={{ backgroundColor: 'transparent' }}
+                            slotProps={{
+                                legend: {
+                                    direction: 'row',
+                                    position: { vertical: 'bottom', horizontal: 'middle' },
+                                    padding: 0,
+                                },
+                            }}
+                        />
+                    </Box>
+                </Box>
+
+                {/* תרשים קו */}
+                <Box sx={{
+                    width: { xs: '100%', md: '50%' },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                }}>
+                    <ExpensesChart />
+                </Box>
+            </Box>
+
             {/* דילוג להוספת הוצאה */}
             <AddTransactionDialog
                 open={showAddDialog}
@@ -241,46 +488,6 @@ export default function Expenses() {
                     </Button>
                 </DialogActions>
             </Dialog>
-
-            {/* הוספת הגרף */}
-            <Box sx={{ mt: 4, width: '100%' }}>
-                <Typography
-                    variant="h6"
-                    align="center"
-                    sx={{
-                        mb: 2,
-                        color: '#658285',
-                        fontWeight: 'bold'
-                    }}
-                >
-                    התפלגות הוצאות לפי קטגוריות
-                </Typography>
-                <Box sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    backgroundColor: 'transparent'
-                }}>
-                    <PieChart
-                        series={[
-                            {
-                                data: pieChartData,
-                                highlightScope: { faded: 'global', highlighted: 'item' },
-                                arcLabel: (item) => `${item.label}: ${item.value.toLocaleString()} ₪`,
-                            },
-                        ]}
-                        width={350}
-                        height={350}
-                        sx={{ backgroundColor: 'transparent' }}
-                        slotProps={{
-                            legend: {
-                                direction: 'row',
-                                position: { vertical: 'bottom', horizontal: 'middle' },
-                                padding: 0,
-                            },
-                        }}
-                    />
-                </Box>
-            </Box>
         </Box>
     );
 } 

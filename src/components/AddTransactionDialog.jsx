@@ -96,6 +96,7 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
             }}
             aria-labelledby="transaction-dialog-title"
             aria-describedby="transaction-dialog-description"
+            aria-modal="true"
         >
             <DialogTitle
                 id="transaction-dialog-title"

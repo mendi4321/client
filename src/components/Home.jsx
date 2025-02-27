@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography, Paper, Container, Grid } from '@mui/material';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
+import { NavLink } from 'react-router-dom';
 
 // מסך הבית
 export default function Home() {
@@ -36,16 +37,18 @@ export default function Home() {
                                     backgroundColor: '#c8e6c9',
                                     cursor: 'pointer'
                                 }
-                            }}//להצביר כפתור שמפנה למסך ההוצאות והכנסות 
-                            onClick={() => window.location.href = '/income-expenses'}
+                            }}
                         >
+                            {/* כפתור שמפנה למסך ההוצאות והכנסות */}
                             <AccountBalanceWalletIcon sx={{ fontSize: 60, color: '#4caf50', mb: 2 }} />
-                            <Typography variant="h4" sx={{ mb: 2, color: '#2e7d32' }}>
-                                ניהול הכנסות והוצאות
-                            </Typography>
-                            <Typography variant="body1" sx={{ color: '#1b5e20' }}>
-                                נהלו את התקציב שלכם בקלות עם מעקב אחר הכנסות והוצאות
-                            </Typography>
+                            <NavLink to="/income-expenses" style={{ textDecoration: 'none' }}>
+                                <Typography variant="h4" sx={{ mb: 2, color: '#2e7d32' }}>
+                                    !ניהול הכנסות והוצאות
+                                </Typography>
+                                <Typography variant="body1" sx={{ color: '#1b5e20' }}>
+                                    נהלו את התקציב שלכם בקלות עם מעקב אחר הכנסות והוצאות
+                                </Typography>
+                            </NavLink>
                         </Paper>
                     </Grid>
 
@@ -62,16 +65,18 @@ export default function Home() {
                                     backgroundColor: '#bbdefb',
                                     cursor: 'pointer'
                                 }
-                            }}//להצביר כפתור שמפנה למסך הטיפים 
-                            onClick={() => window.location.href = '/tips'}
+                            }}
                         >
+
                             <TipsAndUpdatesIcon sx={{ fontSize: 60, color: '#1976d2', mb: 2 }} />
-                            <Typography variant="h4" sx={{ mb: 2, color: '#1565c0' }}>
-                                טיפים לחיסכון
-                            </Typography>
-                            <Typography variant="body1" sx={{ color: '#0d47a1' }}>
-                                גלו טיפים מועילים לחיסכון וניהול כספים נכון
-                            </Typography>
+                            <NavLink to="/tips" style={{ textDecoration: 'none' }}>
+                                <Typography variant="h4" sx={{ mb: 2, color: '#1565c0' }}>
+                                    !טיפים לחיסכון
+                                </Typography>
+                                <Typography variant="body1" sx={{ color: '#0d47a1' }}>
+                                    גלו טיפים מועילים לחיסכון וניהול כספים נכון
+                                </Typography>
+                            </NavLink>
                         </Paper>
                     </Grid>
                 </Grid>
@@ -82,9 +87,9 @@ export default function Home() {
                         התחילו לנהל את הכספים שלכם בצורה חכמה
                     </Typography>
                     <Typography variant="body1" sx={{ color: '#658285' }}>
-                        עם הכלים שלנו, תוכלו לעקוב אחר ההוצאות וההכנסות שלכם,
+                        ,עם הכלים שלנו, תוכלו לעקוב אחר ההוצאות וההכנסות שלכם
                         <br />
-                        לקבל תובנות על דפוסי ההוצאות שלכם ולקבל טיפים לחיסכון.
+                        .לקבל תובנות על דפוסי ההוצאות שלכם ולקבל טיפים לחיסכון
                     </Typography>
                 </Box>
             </Box>

@@ -1,27 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Box,
-    Paper,
-    Typography,
-    Button,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    IconButton,
-    Stack,
-    Snackbar,
-    Alert,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    DialogActions,
-    ToggleButtonGroup,
-    ToggleButton
-} from '@mui/material';
+import { Box, Paper, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Stack, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, ToggleButtonGroup, ToggleButton, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import EditIcon from '@mui/icons-material/Edit';
@@ -35,6 +13,7 @@ import { getTransactions, deleteTransaction } from "../api/transactionApi";
 import AddTransactionDialog from './AddTransactionDialog';
 import EditTransactionDialog from './EditTransactionDialog';
 import dayjs from 'dayjs';
+import { convertCurrency } from '../api/currencyApi';
 
 // מסך ההכנסות והוצאות
 export default function IncomeExpenses() {
@@ -54,6 +33,25 @@ export default function IncomeExpenses() {
         open: false,
         transactionId: null
     });
+    const [selectedCurrency, setSelectedCurrency] = useState('ILS');
+    const [convertedTotalIncome, setConvertedTotalIncome] = useState(0);
+    const [convertedTotalExpenses, setConvertedTotalExpenses] = useState(0);
+    const [convertedAmounts, setConvertedAmounts] = useState({});
+
+    const currencies = [
+        { value: 'ILS', label: '₪ (שקל)' },
+        { value: 'USD', label: '$ (דולר)' },
+        { value: 'EUR', label: '€ (אירו)' }
+    ];
+
+    // חישוב הסכומים המסוננים לפי טווח הזמן הנבחר - נעביר לפני ה-useEffect
+    const filteredTotalIncome = filteredTransactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + Number(t.amount), 0);
+
+    const filteredTotalExpenses = filteredTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + Number(t.amount), 0);
 
     // טעינת העסקאות בטעינת הדף
     useEffect(() => {
@@ -64,6 +62,29 @@ export default function IncomeExpenses() {
     useEffect(() => {
         filterTransactionsByDateRange();
     }, [transactions, dateRange]);
+
+    // המרת סכומים כאשר המטבע משתנה
+    useEffect(() => {
+        const convertAmounts = async () => {
+            if (selectedCurrency === 'ILS') {
+                setConvertedTotalIncome(filteredTotalIncome);
+                setConvertedTotalExpenses(filteredTotalExpenses);
+                return;
+            }
+
+            try {
+                const convertedIncome = await convertCurrency(filteredTotalIncome, 'ILS', selectedCurrency);
+                const convertedExpenses = await convertCurrency(filteredTotalExpenses, 'ILS', selectedCurrency);
+
+                setConvertedTotalIncome(convertedIncome);
+                setConvertedTotalExpenses(convertedExpenses);
+            } catch (error) {
+                console.error('Error converting amounts:', error);
+            }
+        };
+
+        convertAmounts();
+    }, [selectedCurrency, filteredTotalIncome, filteredTotalExpenses]);
 
     // טעינת העסקאות
     const loadTransactions = async () => {
@@ -116,6 +137,7 @@ export default function IncomeExpenses() {
 
         setFilteredTransactions(filtered);
     };
+
     // פונקציה להוספת עסקה
     const handleAddClick = (type) => {
         setTransactionType(type);
@@ -161,82 +183,96 @@ export default function IncomeExpenses() {
         .filter(t => t.type === 'expense')
         .reduce((sum, t) => sum + Number(t.amount), 0);
 
-    // חישוב הסכומים המסוננים לפי טווח הזמן הנבחר
-    const filteredTotalIncome = filteredTransactions
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + Number(t.amount), 0);
+    // הוספת פונקציה להצגת סמל המטבע
+    const getCurrencySymbol = (currencyCode) => {
+        switch (currencyCode) {
+            case 'ILS': return '₪';
+            case 'USD': return '$';
+            case 'EUR': return '€';
+            default: return currencyCode;
+        }
+    };
 
-    const filteredTotalExpenses = filteredTransactions
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + Number(t.amount), 0);
+    // נוסיף useEffect להמרת הסכומים בטבלה
+    useEffect(() => {
+        const convertTableAmounts = async () => {
+            if (selectedCurrency === 'ILS') {
+                setConvertedAmounts({});
+                return;
+            }
+
+            const converted = {};
+            for (const transaction of filteredTransactions) {
+                const amount = await convertCurrency(Number(transaction.amount), 'ILS', selectedCurrency);
+                converted[transaction._id] = amount;
+            }
+            setConvertedAmounts(converted);
+        };
+
+        convertTableAmounts();
+    }, [selectedCurrency, filteredTransactions]);
+
     // מסך ההכנסות והוצאות  
     return (
         <Box sx={{ p: 3 }}>
+            {/* בחירת מטבע - העברנו לחלק העליון */}
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+                <FormControl sx={{ minWidth: 120 }}>
+                    <InputLabel>מטבע</InputLabel>
+                    <Select
+                        value={selectedCurrency}
+                        onChange={(e) => setSelectedCurrency(e.target.value)}
+                        label="מטבע"
+                    >
+                        {currencies.map((currency) => (
+                            <MenuItem key={currency.value} value={currency.value}>
+                                {currency.label}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </Box>
+
+            {/* הצגת הסכומים המומרים */}
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 4 }}>
+                <Paper sx={{ p: 2, flex: 1, bgcolor: '#e8f5e9', textAlign: 'center' }}>
+                    <Typography variant="h6">סך הכנסות</Typography>
+                    <Typography variant="h4" sx={{ color: '#4caf50' }}>
+                        {getCurrencySymbol(selectedCurrency)}
+                        {convertedTotalIncome.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    </Typography>
+                </Paper>
+
+                <Paper sx={{ p: 2, flex: 1, bgcolor: '#ffebee', textAlign: 'center' }}>
+                    <Typography variant="h6">סך הוצאות</Typography>
+                    <Typography variant="h4" sx={{ color: '#f44336' }}>
+                        {getCurrencySymbol(selectedCurrency)}
+                        {convertedTotalExpenses.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    </Typography>
+                </Paper>
+
+                <Paper sx={{ p: 2, flex: 1, bgcolor: '#e3f2fd', textAlign: 'center' }}>
+                    <Typography variant="h6">מאזן</Typography>
+                    <Typography variant="h4" sx={{
+                        color: convertedTotalIncome - convertedTotalExpenses >= 0 ? '#4caf50' : '#f44336'
+                    }}>
+                        {getCurrencySymbol(selectedCurrency)}
+                        {(convertedTotalIncome - convertedTotalExpenses).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    </Typography>
+                </Paper>
+            </Stack>
+
             {error && (
                 <Typography color="error" sx={{ mb: 2 }}>
                     {error}
                 </Typography>
             )}
-            {/* כרטיסי סיכום */}
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 3 }}>
-                <Paper sx={{ p: 2, flex: 1, bgcolor: '#e8f5e9', textAlign: 'center' }}>
-                    <Typography variant="h6">סך הכנסות</Typography>
-                    <Typography variant="h4" sx={{ my: 2 }}>
-                        ₪{totalIncome.toLocaleString()}
-                    </Typography>
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() => handleAddClick('income')}
-                        sx={{
-                            backgroundColor: '#4caf50',
-                            '&:hover': { backgroundColor: '#388e3c' }
-                        }}
-                    >
-                        הוסף הכנסה
-                    </Button>
-                </Paper>
-                <Paper sx={{ p: 2, flex: 1, bgcolor: '#ffebee', textAlign: 'center' }}>
-                    <Typography variant="h6">סך הוצאות</Typography>
-                    <Typography variant="h4" sx={{ my: 2 }}>
-                        ₪{totalExpenses.toLocaleString()}
-                    </Typography>
-                    <Button
-                        variant="contained"
-                        startIcon={<RemoveIcon />}
-                        onClick={() => handleAddClick('expense')}
-                        sx={{
-                            backgroundColor: '#f44336',
-                            '&:hover': { backgroundColor: '#d32f2f' }
-                        }}
-                    >
-                        הוסף הוצאה
-                    </Button>
-                </Paper>
-
-                <Paper sx={{ p: 2, flex: 1, bgcolor: '#e3f2fd', textAlign: 'center' }}>
-                    <Typography variant="h6">מאזן ({dateRangeToDisplay()})</Typography>
-                    <Typography
-                        variant="h4"
-                        sx={{
-                            my: 2,
-                            color: filteredTotalIncome - filteredTotalExpenses >= 0 ? 'green' : 'red'
-                        }}
-                    >
-                        ₪{(filteredTotalIncome - filteredTotalExpenses).toLocaleString()}
-                    </Typography>
-                    <Typography variant="body1">
-                        {filteredTotalIncome - filteredTotalExpenses >= 0 ? 'חיסכון חיובי!' : 'חיסכון שלילי!'}
-                    </Typography>
-                </Paper>
-            </Stack>
-
             {/* טבלת עסקאות והגרף זה לצד זה */}
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3, mb: 3 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
                 {/* טבלת עסקאות */}
                 <Box sx={{ flex: 2 }}> {/* תופס 60% במסך גדול */}
                     <Typography
-                        variant="h8"
+                        variant="h7"
                         sx={{
                             color: 'text.primary',
                             textAlign: 'center',
@@ -251,7 +287,7 @@ export default function IncomeExpenses() {
                     <TableContainer component={Box}
                         sx={{
                             backgroundColor: '#658285',
-                            height: '75%',
+                            height: '75vh',
                         }}>
                         {/* טבלת העסקאות שמוצגת בטופס טבלה */}
                         <Table>
@@ -285,7 +321,11 @@ export default function IncomeExpenses() {
                                                     fontWeight: 'bold'
                                                 }}
                                             >
-                                                ₪{Number(transaction.amount).toLocaleString()}
+                                                {getCurrencySymbol(selectedCurrency)}
+                                                {(selectedCurrency === 'ILS'
+                                                    ? Number(transaction.amount)
+                                                    : convertedAmounts[transaction._id] || Number(transaction.amount)
+                                                ).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                                             </TableCell>
                                             <TableCell>
                                                 <IconButton
@@ -323,16 +363,34 @@ export default function IncomeExpenses() {
                     <Typography variant="h6" sx={{ mb: 2, textAlign: 'center' }}>
                         התפלגות הכנסות והוצאות ({dateRangeToDisplay()})
                     </Typography>
-                    <Box sx={{ p: 2, display: 'flex', justifyContent: 'center', height: 'calc(100% - 32px)' }}>
+                    <Box sx={{
+                        p: 2,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        height: 'calc(100% - 32px)',
+                        marginLeft: '10%',
+                        marginRight: '10%',
+                    }}>
+                        {/* גרף פאי להצגת הכנסות והוצאות */}
                         <PieChart
                             series={[
                                 {
                                     data: [
-                                        { id: 0, value: filteredTotalIncome, color: '#4caf50', label: 'הכנסות' },
-                                        { id: 1, value: filteredTotalExpenses, color: '#f44336', label: 'הוצאות' }
+                                        {
+                                            id: 0,
+                                            value: convertedTotalIncome || filteredTotalIncome,
+                                            color: '#4caf50',
+                                            label: 'הכנסות'
+                                        },
+                                        {
+                                            id: 1,
+                                            value: convertedTotalExpenses || filteredTotalExpenses,
+                                            color: '#f44336',
+                                            label: 'הוצאות'
+                                        }
                                     ],
                                     type: 'pie',
-                                    arcLabel: (item) => `${item.label}: ${item.value.toLocaleString()} ₪`,
+                                    arcLabel: (item) => `${item.label}: ${item.value.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${getCurrencySymbol(selectedCurrency)}`,
                                 },
                             ]}
                             width={350}
@@ -346,7 +404,7 @@ export default function IncomeExpenses() {
             </Box>
 
             {/* טווח זמן לסינון */}
-            <Box sx={{ color: '#658285', p: 2, mb: 3, textAlign: 'center' }}>
+            <Box sx={{ color: '#658285', p: 2, mb: 3, textAlign: 'center', marginTop: 0 }}>
                 {/* כותרת הטווח זמן להצגת נתונים */}
                 <Typography variant="h6" gutterBottom>
                     בחר טווח זמן להצגת נתונים

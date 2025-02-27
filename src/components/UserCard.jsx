@@ -27,10 +27,10 @@ export default function UserCard(props) {
         }}>
             <Stack spacing={2}>
                 <Typography variant="h6" sx={{ color: '#e9d0ab' }}>
-                    שלום {user.firstName}
+                    {user.firstName + ' ' + user.lastName}    :שלום
                 </Typography>
                 <Typography sx={{ color: '#e9d0ab' }}>
-                    {user.email}
+                    {user.email}     :אימייל
                 </Typography>
                 <Button
                     startIcon={<LogoutIcon />}
