@@ -9,7 +9,7 @@ import Home from './components/Home'
 import Reminders from './components/Reminders'
 import { useContext } from 'react';
 import { UserContext } from './components/UserContext';
-
+import Bank from './components/Bank'
 // קומפוננטת ProtectedRoute שתבדוק אם המשתמש מחובר
 const ProtectedRoute = ({ children }) => {//מגן על הדף מכך שהמשתמש לא יכול להגיע לדף זה אם לא מחובר
   const { user } = useContext(UserContext);//מציאת המשתמש מהקונסטקט
@@ -47,9 +47,9 @@ function App() {
               <Reminders />
             </ProtectedRoute>
           } />
-          <Route path="/tips" element={
+          <Route path="/bank" element={
             <ProtectedRoute>
-              <div>Tips Page</div>
+              <Bank />
             </ProtectedRoute>
           } />
 

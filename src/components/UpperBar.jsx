@@ -23,7 +23,7 @@ const pages = [
     { name: 'הכנסות', path: '/income' },
     { name: 'הוצאות', path: '/expenses' },
     { name: 'תזכורות', path: '/reminders' },
-    { name: 'טיפים', path: '/tips' }
+    { name: 'בנק', path: '/bank' }
 ];
 export default function UpperBar() {
     const [anchorElNav, setAnchorElNav] = useState(null);
@@ -94,7 +94,7 @@ export default function UpperBar() {
                             noWrap
                             sx={{
                                 position: 'absolute',
-                                left: '50%',
+                                left: '30%',
                                 transform: 'translateX(-50%)',
                                 fontFamily: 'monospace',
                                 fontWeight: 700,
