@@ -209,8 +209,8 @@ export default function Reminders() {
     return (
         <Container maxWidth="lg">
             <Box sx={{ pt: 4, pb: 6 }}>
-                <Typography variant="h4" gutterBottom align="center" sx={{ mb: 4, color: '#658285' }}>
-                    תזכורות
+                <Typography variant="h4" gutterBottom align="center" sx={{ mb: 4, color: '#658285', fontWeight: 'bold', fontSize: '75px' }}>
+                    תזכורות!
                 </Typography>
 
                 {/* רכיב בחירת טווח זמן - עיצוב חדש עם צ'יפים */}
@@ -225,6 +225,7 @@ export default function Reminders() {
                                 bgcolor: dateRange === 'day' ? '#658285' : 'transparent',
                                 color: dateRange === 'day' ? 'white' : '#658285',
                                 border: '1px solid #658285',
+                                padding: '10px',
                                 '&:hover': {
                                     bgcolor: dateRange === 'day' ? '#4a6366' : 'rgba(101, 130, 133, 0.1)'
                                 }
@@ -239,6 +240,7 @@ export default function Reminders() {
                                 bgcolor: dateRange === 'week' ? '#658285' : 'transparent',
                                 color: dateRange === 'week' ? 'white' : '#658285',
                                 border: '1px solid #658285',
+                                padding: '10px',
                                 '&:hover': {
                                     bgcolor: dateRange === 'week' ? '#4a6366' : 'rgba(101, 130, 133, 0.1)'
                                 }
@@ -253,6 +255,7 @@ export default function Reminders() {
                                 bgcolor: dateRange === 'month' ? '#658285' : 'transparent',
                                 color: dateRange === 'month' ? 'white' : '#658285',
                                 border: '1px solid #658285',
+                                padding: '10px',
                                 '&:hover': {
                                     bgcolor: dateRange === 'month' ? '#4a6366' : 'rgba(101, 130, 133, 0.1)'
                                 }
@@ -267,6 +270,7 @@ export default function Reminders() {
                                 bgcolor: dateRange === 'year' ? '#658285' : 'transparent',
                                 color: dateRange === 'year' ? 'white' : '#658285',
                                 border: '1px solid #658285',
+                                padding: '10px',
                                 '&:hover': {
                                     bgcolor: dateRange === 'year' ? '#4a6366' : 'rgba(101, 130, 133, 0.1)'
                                 }
@@ -288,7 +292,7 @@ export default function Reminders() {
                     <Typography variant="h6" sx={{ color: '#658285' }}>
                         התזכורות שלך ({dateRangeToDisplay()})
                     </Typography>
-                    <Typography variant="body1" sx={{ color: '#658285', mt: 1 }}>
+                    <Typography variant="body1" sx={{ color: '#658285', mt: 1, marginBottom: '0' }}>
                         סה"כ {filteredReminders.length} תזכורות
                     </Typography>
                 </Paper>
@@ -370,13 +374,13 @@ export default function Reminders() {
                     </Table>
                 </TableContainer>
 
-                {/* דיאלוג להוספת תזכורת */}
+                {/* חלון להוספת תזכורת */}
                 <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-                    <DialogTitle>
+                    <DialogTitle sx={{ backgroundColor: '#658285', color: '#e9d0ab' }}>
                         {selectedReminder ? 'עריכת תזכורת' : 'תזכורת חדשה'}
                     </DialogTitle>
                     {/* תוכן הדיאלוג */}
-                    <DialogContent>
+                    <DialogContent sx={{ backgroundColor: '#fff9eb' }}>
                         <Stack spacing={3} sx={{ mt: 2 }}>
                             <TextField
                                 label="כותרת"
@@ -402,8 +406,8 @@ export default function Reminders() {
                         </Stack>
                     </DialogContent>
                     {/* כפתורים לסגירת הדיאלוג ולשמירת התזכורת */}
-                    <DialogActions>
-                        <Button onClick={handleCloseDialog}>ביטול</Button>
+                    <DialogActions sx={{ backgroundColor: '#e9d0ab' }}>
+                        <Button color='#658285' onClick={handleCloseDialog}>ביטול</Button>
                         <Button
                             onClick={handleSubmit}
                             variant="contained"

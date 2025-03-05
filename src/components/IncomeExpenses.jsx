@@ -215,24 +215,6 @@ export default function IncomeExpenses() {
     // מסך ההכנסות והוצאות  
     return (
         <Box sx={{ p: 3 }}>
-            {/* בחירת מטבע - העברנו לחלק העליון */}
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
-                <FormControl sx={{ minWidth: 120 }}>
-                    <InputLabel>מטבע</InputLabel>
-                    <Select
-                        value={selectedCurrency}
-                        onChange={(e) => setSelectedCurrency(e.target.value)}
-                        label="מטבע"
-                    >
-                        {currencies.map((currency) => (
-                            <MenuItem key={currency.value} value={currency.value}>
-                                {currency.label}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            </Box>
-
             {/* הצגת הסכומים המומרים */}
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 4 }}>
                 <Paper sx={{ p: 2, flex: 1, bgcolor: '#e8f5e9', textAlign: 'center' }}>
@@ -259,6 +241,30 @@ export default function IncomeExpenses() {
                         {getCurrencySymbol(selectedCurrency)}
                         {(convertedTotalIncome - convertedTotalExpenses).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                     </Typography>
+
+                    {/* הוספת הערכה למאזן */}
+                    <Box sx={{ mt: 1, p: 1, borderRadius: '4px', bgcolor: convertedTotalIncome - convertedTotalExpenses >= 0 ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)' }}>
+                        <Typography variant="subtitle1" sx={{
+                            fontWeight: 'bold',
+                            color: convertedTotalIncome - convertedTotalExpenses >= 0 ? '#4caf50' : '#f44336'
+                        }}>
+                            {convertedTotalIncome - convertedTotalExpenses >= 0
+                                ? 'מאזן חיובי - מצב טוב!'
+                                : 'מאזן שלילי - נדרש שיפור'}
+                        </Typography>
+
+                        {convertedTotalIncome - convertedTotalExpenses > 0 && (
+                            <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                ניתן לחסוך
+                            </Typography>
+                        )}
+
+                        {convertedTotalIncome - convertedTotalExpenses < 0 && (
+                            <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                מומלץ לצמצם הוצאות
+                            </Typography>
+                        )}
+                    </Box>
                 </Paper>
             </Stack>
 
@@ -267,10 +273,88 @@ export default function IncomeExpenses() {
                     {error}
                 </Typography>
             )}
+
+            {/* אזור הסינון - בחירת טווח זמן ובחירת מטבע ממורכזים */}
+            <Box sx={{
+                display: 'flex',
+                justifyContent: 'center', // שינוי מ-space-between ל-center
+                mb: 3,
+                flexDirection: { xs: 'column', md: 'row' },
+                gap: { xs: 3, md: 4 }, // הגדלת הרווח בין הרכיבים
+                alignItems: 'center' // מרכוז אנכי
+            }}>
+                {/* טווח זמן לסינון */}
+                <Box sx={{
+                    color: '#658285',
+                    p: 2,
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center' // מרכוז בכל המסכים
+                }}>
+                    <Typography variant="h6" gutterBottom>
+                        בחר טווח זמן להצגת נתונים
+                    </Typography>
+                    <ToggleButtonGroup
+                        value={dateRange}
+                        exclusive
+                        onChange={(e, newValue) => {
+                            if (newValue) setDateRange(newValue);
+                        }}
+                        aria-label="טווח זמן"
+                        sx={{ mt: 1 }}
+                    >
+                        <ToggleButton value="day" aria-label="יום">
+                            <CalendarViewDayIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                            יום
+                        </ToggleButton>
+                        <ToggleButton value="week" aria-label="שבוע">
+                            <ViewWeekIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                            שבוע
+                        </ToggleButton>
+                        <ToggleButton value="month" aria-label="חודש">
+                            <DateRangeIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                            חודש
+                        </ToggleButton>
+                        <ToggleButton value="year" aria-label="שנה">
+                            <CalendarMonthIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                            שנה
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </Box>
+
+                {/* בחירת מטבע */}
+                <Box sx={{
+                    p: 2,
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center' // מרכוז בכל המסכים
+                }}>
+                    <Typography variant="h6" gutterBottom sx={{ color: '#658285' }}>
+                        בחר מטבע להצגת נתונים
+                    </Typography>
+                    <FormControl sx={{ minWidth: 150, mt: 1 }}>
+                        <InputLabel>מטבע</InputLabel>
+                        <Select
+                            value={selectedCurrency}
+                            onChange={(e) => setSelectedCurrency(e.target.value)}
+                            label="מטבע"
+                        >
+                            {currencies.map((currency) => (
+                                <MenuItem key={currency.value} value={currency.value}>
+                                    {currency.label}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Box>
+            </Box>
+
             {/* טבלת עסקאות והגרף זה לצד זה */}
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
                 {/* טבלת עסקאות */}
-                <Box sx={{ flex: 2 }}> {/* תופס 60% במסך גדול */}
+                <Box sx={{ flex: 2, marginRight: '75px' }}> {/* תופס 60% במסך גדול */}
                     <Typography
                         variant="h7"
                         sx={{
@@ -290,9 +374,9 @@ export default function IncomeExpenses() {
                             height: '75vh',
                         }}>
                         {/* טבלת העסקאות שמוצגת בטופס טבלה */}
-                        <Table>
+                        <Table  >
                             <TableHead sx={{ position: 'sticky', top: 0, backgroundColor: '#658285', zIndex: 1 }}>
-                                <TableRow >
+                                <TableRow  >
                                     <TableCell sx={{ color: '#e9d0ab' }}>תאריך</TableCell>
                                     <TableCell sx={{ color: '#e9d0ab' }}>סוג</TableCell>
                                     <TableCell sx={{ color: '#e9d0ab' }}>תיאור</TableCell>
@@ -364,14 +448,14 @@ export default function IncomeExpenses() {
                         התפלגות הכנסות והוצאות ({dateRangeToDisplay()})
                     </Typography>
                     <Box sx={{
-                        p: 2,
                         display: 'flex',
                         justifyContent: 'center',
                         height: 'calc(100% - 32px)',
                         marginLeft: '10%',
                         marginRight: '10%',
+                        position: 'relative',
                     }}>
-                        {/* גרף פאי להצגת הכנסות והוצאות */}
+                        {/* גרף פאי להצגת הכנסות והוצאות - עיצוב מודרני עם רקע שקוף */}
                         <PieChart
                             series={[
                                 {
@@ -379,62 +463,77 @@ export default function IncomeExpenses() {
                                         {
                                             id: 0,
                                             value: convertedTotalIncome || filteredTotalIncome,
-                                            color: '#4caf50',
-                                            label: 'הכנסות'
+                                            color: '#4CAF50',
+                                            label: 'הכנסות',
                                         },
                                         {
                                             id: 1,
                                             value: convertedTotalExpenses || filteredTotalExpenses,
-                                            color: '#f44336',
-                                            label: 'הוצאות'
+                                            color: '#F44336',
+                                            label: 'הוצאות',
                                         }
                                     ],
                                     type: 'pie',
-                                    arcLabel: (item) => `${item.label}: ${item.value.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${getCurrencySymbol(selectedCurrency)}`,
+                                    innerRadius: 30,
+                                    outerRadius: 120,
+                                    paddingAngle: 2,
+                                    cornerRadius: 4,
+                                    startAngle: -90,
+                                    endAngle: 270,
+                                    cx: 175,
+                                    cy: 175,
+                                    highlightScope: { faded: 'global', highlighted: 'item' },
+                                    faded: { innerRadius: 30, additionalRadius: -30, color: 'gray' },
+                                    arcLabel: (item) => `${item.value.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${getCurrencySymbol(selectedCurrency)}`,
+                                    arcLabelMinAngle: 20,
                                 },
                             ]}
                             width={350}
                             height={350}
+                            margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            slotProps={{
+                                legend: {
+                                    direction: 'row',
+                                    position: { vertical: 'bottom', horizontal: 'middle' },
+                                    padding: 0,
+                                    labelStyle: {
+                                        fontSize: 14,
+                                        fontWeight: 'bold',
+                                        fill: '#333',
+                                    },
+                                },
+                                svg: {
+                                    style: {
+                                        backgroundColor: 'transparent',
+                                    }
+                                }
+                            }}
                             sx={{
-                                backgroundColor: 'transparent'
+                                backgroundColor: 'transparent',
+                                '& .MuiChartsLegend-root': {
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    gap: '24px',
+                                    marginTop: '16px',
+                                },
+                                '& .MuiChartsLegend-label': {
+                                    fontSize: '0.875rem',
+                                    fontWeight: 'bold',
+                                },
+                                '& .MuiChartsLegend-mark': {
+                                    borderRadius: '50%',
+                                    width: '12px',
+                                    height: '12px',
+                                },
+                                '& text': {
+                                    fill: '#333',
+                                    fontWeight: 'bold',
+                                    fontSize: '0.75rem',
+                                },
                             }}
                         />
                     </Box>
                 </Box>
-            </Box>
-
-            {/* טווח זמן לסינון */}
-            <Box sx={{ color: '#658285', p: 2, mb: 3, textAlign: 'center', marginTop: 0 }}>
-                {/* כותרת הטווח זמן להצגת נתונים */}
-                <Typography variant="h6" gutterBottom>
-                    בחר טווח זמן להצגת נתונים
-                </Typography>
-                <ToggleButtonGroup
-                    value={dateRange}
-                    exclusive
-                    onChange={(e, newValue) => {
-                        if (newValue) setDateRange(newValue);
-                    }}
-                    aria-label="טווח זמן"
-                    sx={{ mt: 1 }}
-                >
-                    <ToggleButton value="day" aria-label="יום">
-                        <CalendarViewDayIcon sx={{ mr: 1, color: '#e9d0ab' }} />
-                        יום
-                    </ToggleButton>
-                    <ToggleButton value="week" aria-label="שבוע">
-                        <ViewWeekIcon sx={{ mr: 1, color: '#e9d0ab' }} />
-                        שבוע
-                    </ToggleButton>
-                    <ToggleButton value="month" aria-label="חודש">
-                        <DateRangeIcon sx={{ mr: 1, color: '#e9d0ab' }} />
-                        חודש
-                    </ToggleButton>
-                    <ToggleButton value="year" aria-label="שנה">
-                        <CalendarMonthIcon sx={{ mr: 1, color: '#e9d0ab' }} />
-                        שנה
-                    </ToggleButton>
-                </ToggleButtonGroup>
             </Box>
 
             {/* דיאלוג הוספת עסקה */}
@@ -465,17 +564,17 @@ export default function IncomeExpenses() {
                 }}
             >
                 {/* כותרת הדיאלוג */}
-                <DialogTitle>
+                <DialogTitle sx={{ backgroundColor: '#fff9eb' }}>
                     אישור מחיקה
                 </DialogTitle>
                 {/* תוכן הדיאלוג */}
-                <DialogContent>
+                <DialogContent sx={{ backgroundColor: '#fff9eb' }}>
                     <DialogContentText>
                         האם אתה בטוח שברצונך למחוק עסקה זו?
                     </DialogContentText>
                 </DialogContent>
                 {/* כפתורים הדיאלוג */}
-                <DialogActions>
+                <DialogActions sx={{ backgroundColor: '#658285' }}>
                     <Button
                         onClick={() => setDeleteDialog({ open: false, transactionId: null })}
                         color="inherit"

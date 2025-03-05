@@ -329,7 +329,8 @@ export default function Income() {
                 sx={{
                     backgroundColor: '#658285',
                     height: '50vh',
-                    width: '80%',
+                    width: '75%',
+                    margin: '0 auto'
                 }}>
                 <Table >
                     <TableHead sx={{ position: 'sticky', top: 0, backgroundColor: '#658285', zIndex: 1 }}>
@@ -402,6 +403,12 @@ export default function Income() {
                 onClose={() => setDeleteDialog({ open: false, transactionId: null })}
                 aria-modal="true"
                 role="alertdialog"
+                sx={{
+                    '& .MuiDialog-paper': {
+                        backgroundColor: '#e9d0ab',
+                        color: '#658285'
+                    }
+                }}
             >
                 <DialogTitle>אישור מחיקה</DialogTitle>
                 <DialogContent>

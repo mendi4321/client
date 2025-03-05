@@ -2,3 +2,7 @@ body {
     margin: 0;
     background-color: #fff9eb;
 }
+
+.Mui-selected {
+    color: #e7bf64 !important;
+}

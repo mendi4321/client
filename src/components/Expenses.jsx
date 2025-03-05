@@ -237,7 +237,7 @@ export default function Expenses() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            width: '100%',
+
         }}>
             {error && (
                 <Typography color="error" sx={{ mb: 2 }}>
@@ -327,53 +327,144 @@ export default function Expenses() {
                     width: '75%',
                     bgcolor: '#658285',
                     height: '50vh',
+                    mb: 4,
+                    borderRadius: '8px',
+                    boxShadow: '0 3px 5px rgba(0,0,0,0.2)',
+                    overflow: 'auto'
                 }}>
-                <Table>
-                    <TableHead sx={{ position: 'sticky', top: 0, backgroundColor: '#658285', zIndex: 1 }}>
-                        <TableRow >
-                            <TableCell sx={{ color: '#e9d0ab' }}>תאריך</TableCell>
-                            <TableCell sx={{ color: '#e9d0ab' }}>תיאור</TableCell>
-                            <TableCell sx={{ color: '#e9d0ab' }}>סכום</TableCell>
-                            <TableCell sx={{ color: '#e9d0ab' }}>קטגוריה</TableCell>
-                            <TableCell sx={{ color: '#e9d0ab' }}>פעולות</TableCell>
+                <Table stickyHeader>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell
+                                sx={{
+                                    backgroundColor: '#658285',
+                                    color: '#e9d0ab',
+                                    fontWeight: 'bold',
+                                    fontSize: '1rem',
+                                    textAlign: 'center',
+                                    borderBottom: '2px solid #e9d0ab'
+                                }}
+                            >
+                                תאריך
+                            </TableCell>
+                            <TableCell
+                                sx={{
+                                    backgroundColor: '#658285',
+                                    color: '#e9d0ab',
+                                    fontWeight: 'bold',
+                                    fontSize: '1rem',
+                                    textAlign: 'center',
+                                    borderBottom: '2px solid #e9d0ab'
+                                }}
+                            >
+                                תיאור
+                            </TableCell>
+                            <TableCell
+                                sx={{
+                                    backgroundColor: '#658285',
+                                    color: '#e9d0ab',
+                                    fontWeight: 'bold',
+                                    fontSize: '1rem',
+                                    textAlign: 'center',
+                                    borderBottom: '2px solid #e9d0ab'
+                                }}
+                            >
+                                סכום
+                            </TableCell>
+                            <TableCell
+                                sx={{
+                                    backgroundColor: '#658285',
+                                    color: '#e9d0ab',
+                                    fontWeight: 'bold',
+                                    fontSize: '1rem',
+                                    textAlign: 'center',
+                                    borderBottom: '2px solid #e9d0ab'
+                                }}
+                            >
+                                קטגוריה
+                            </TableCell>
+                            <TableCell
+                                sx={{
+                                    backgroundColor: '#658285',
+                                    color: '#e9d0ab',
+                                    fontWeight: 'bold',
+                                    fontSize: '1rem',
+                                    textAlign: 'center',
+                                    borderBottom: '2px solid #e9d0ab'
+                                }}
+                            >
+                                פעולות
+                            </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody sx={{ backgroundColor: '#e9d0ab' }}>
-                        {filteredTransactions.map((transaction) => (
-                            <TableRow key={transaction._id}>
-                                <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
-                                <TableCell>{transaction.description}</TableCell>
-                                <TableCell>
-                                    {getCurrencySymbol(selectedCurrency)}
-                                    {(selectedCurrency === 'ILS'
-                                        ? Number(transaction.amount)
-                                        : convertedAmounts[transaction._id] || Number(transaction.amount)
-                                    ).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                </TableCell>
-                                <TableCell>
-                                    <Stack direction="row" alignItems="center" spacing={1}>
-                                        <CategoryIcon sx={{ color: '#658285', fontSize: 20 }} />
-                                        {transaction.category || 'לא מוגדר'}
-                                    </Stack>
-                                </TableCell>
-                                <TableCell>
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => setEditTransaction(transaction)}
-                                        sx={{ mr: 1 }}
-                                    >
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => handleDeleteClick(transaction._id)}
-                                        color="error"
-                                    >
-                                        <DeleteIcon />
-                                    </IconButton>
+                        {filteredTransactions.length > 0 ? (
+                            filteredTransactions.map((transaction) => (
+                                <TableRow
+                                    key={transaction._id}
+                                    sx={{
+                                        backgroundColor: '#e9d0ab',
+                                        '&:hover': { backgroundColor: '#d9c09b' },
+                                        transition: 'background-color 0.2s'
+                                    }}
+                                >
+                                    <TableCell sx={{ textAlign: 'center' }}>
+                                        {new Date(transaction.date).toLocaleDateString()}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: 'center' }}>
+                                        {transaction.description}
+                                    </TableCell>
+                                    <TableCell sx={{
+                                        textAlign: 'center',
+                                        color: '#f44336',
+                                        fontWeight: 'bold'
+                                    }}>
+                                        {getCurrencySymbol(selectedCurrency)}
+                                        {(selectedCurrency === 'ILS'
+                                            ? Number(transaction.amount)
+                                            : convertedAmounts[transaction._id] || Number(transaction.amount)
+                                        ).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: 'center' }}>
+                                        <Stack direction="row" alignItems="center" spacing={1} justifyContent="center">
+                                            <CategoryIcon sx={{ color: '#658285', fontSize: 20 }} />
+                                            {transaction.category || 'לא מוגדר'}
+                                        </Stack>
+                                    </TableCell>
+                                    <TableCell sx={{ textAlign: 'center' }}>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => setEditTransaction(transaction)}
+                                            sx={{
+                                                mr: 1,
+                                                color: '#658285',
+                                                '&:hover': { color: '#4a656d' }
+                                            }}
+                                        >
+                                            <EditIcon />
+                                        </IconButton>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleDeleteClick(transaction._id)}
+                                            sx={{
+                                                color: '#f44336',
+                                                '&:hover': { color: '#d32f2f' }
+                                            }}
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                                    <Typography variant="subtitle1">
+                                        אין הוצאות להצגה בטווח הזמן שנבחר
+                                    </Typography>
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        )}
                     </TableBody>
                 </Table>
             </TableContainer>
@@ -381,7 +472,7 @@ export default function Expenses() {
             {/* אזור התרשימים - עוגה וגרף קו */}
             <Box sx={{
                 mt: 4,
-                width: '100%',
+                width: '80%',
                 display: 'flex',
                 flexDirection: { xs: 'column', md: 'row' },  // טור במובייל, שורה במסך רגיל
                 justifyContent: 'space-between',
@@ -416,17 +507,76 @@ export default function Expenses() {
                                 {
                                     data: pieChartData,
                                     highlightScope: { faded: 'global', highlighted: 'item' },
-                                    arcLabel: (item) => `${item.label}: ${item.value.toLocaleString()} ₪`,
+                                    paddingAngle: 2,
+                                    innerRadius: 20,
+                                    outerRadius: 140,
+                                    cornerRadius: 4,
+                                    startAngle: -90,
+                                    endAngle: 270,
                                 },
                             ]}
-                            width={350}
-                            height={350}
-                            sx={{ backgroundColor: 'transparent' }}
+                            width={400}
+                            height={400}
+                            margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                            sx={{
+                                backgroundColor: 'transparent',
+                                '--ChartsLegend-rootSpacing': '10px',
+                                '--ChartsLegend-itemWidth': '100%',
+                                '--ChartsLegend-itemMarkSize': '10px',
+                                '--ChartsLegend-itemMarkBorderRadius': '5px',
+                                '& .MuiChartsLegend-mark': {
+                                    borderRadius: '5px',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                                },
+                                '& .MuiChartsLegend-label': {
+                                    fontSize: '0.9rem',
+                                    fontWeight: 'medium',
+                                    color: '#555555',
+                                },
+                                '& .MuiChartsLegend-item': {
+                                    marginBottom: '4px',
+                                },
+                                '& .MuiChartsArc-root:hover': {
+                                    filter: 'brightness(0.9)',
+                                    cursor: 'pointer',
+                                },
+                                '& .MuiChartsArc-arc': {
+                                    strokeWidth: 1,
+                                    stroke: '#fff',
+                                    transition: 'all 0.2s',
+                                },
+                                '& .MuiChartsArc-root:hover .MuiChartsArc-arc': {
+                                    stroke: '#fff',
+                                    strokeWidth: 2,
+                                },
+                                '& .MuiChartsArc-root:hover .MuiChartsArc-highlighted': {
+                                    transform: 'scale(1.05)',
+                                    transformOrigin: 'center',
+                                },
+                            }}
                             slotProps={{
                                 legend: {
-                                    direction: 'row',
-                                    position: { vertical: 'bottom', horizontal: 'middle' },
-                                    padding: 0,
+                                    direction: 'column',
+                                    position: { vertical: 'middle', horizontal: 'right' },
+                                    padding: 10,
+                                    itemMarkWidth: 14,
+                                    itemMarkHeight: 14,
+                                    markGap: 8,
+                                    itemGap: 10,
+                                    labelStyle: {
+                                        fontSize: 12,
+                                        fontWeight: 500,
+                                    },
+                                },
+                            }}
+                            tooltip={{
+                                trigger: 'item',
+                                formatter: (item) => {
+                                    const category = item.category || item.label.split(':')[0];
+                                    return {
+                                        title: category,
+                                        content: `${getCurrencySymbol(selectedCurrency)}${item.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
+                                    };
                                 },
                             }}
                         />
@@ -465,6 +615,12 @@ export default function Expenses() {
             <Dialog
                 open={deleteDialog.open}
                 onClose={() => setDeleteDialog({ open: false, transactionId: null })}
+                sx={{
+                    '& .MuiDialog-paper': {
+                        backgroundColor: '#e9d0ab',
+                        color: '#658285'
+                    }
+                }}
             >
                 <DialogTitle>אישור מחיקה</DialogTitle>
                 <DialogContent>

@@ -26,11 +26,11 @@ export default function UserCard(props) {
             color: '#e9d0ab'
         }}>
             <Stack spacing={2}>
-                <Typography variant="h6" sx={{ color: '#e9d0ab' }}>
-                    {user.firstName + ' ' + user.lastName}    :שלום
+                <Typography variant="h7" sx={{ color: '#e9d0ab', fontSize: '20px' }}>
+                    שלום: {user.firstName + ' ' + user.lastName}
                 </Typography>
-                <Typography sx={{ color: '#e9d0ab' }}>
-                    {user.email}     :אימייל
+                <Typography sx={{ color: '#e9d0ab', fontSize: '20px' }}>
+                    אימייל: {user.email}
                 </Typography>
                 <Button
                     startIcon={<LogoutIcon />}
