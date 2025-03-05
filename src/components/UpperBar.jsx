@@ -43,7 +43,7 @@ export default function UpperBar() {
 
     return (
         // תפריט שמוצג בצד שמאל של המסך
-        <Box sx={{ flexGrow: 1 }}>
+        <Box sx={{ flexGrow: 1, position: 'sticky', top: 0, zIndex: 1000 }}>
             <AppBar position="static" sx={{ backgroundColor: '#658285' }}>
                 <Container maxWidth="xl">
                     <Toolbar disableGutters>
@@ -94,7 +94,7 @@ export default function UpperBar() {
                             noWrap
                             sx={{
                                 position: 'absolute',
-                                left: '30%',
+                                left: '50%',
                                 transform: 'translateX(-50%)',
                                 fontFamily: 'monospace',
                                 fontWeight: 700,
@@ -113,7 +113,6 @@ export default function UpperBar() {
                                 xs: 'none', md: 'flex'
                             },
                             justifyContent: 'flex-start',
-                            flexDirection: 'row-reverse',
                             marginRight: '20px',
 
                         }}>

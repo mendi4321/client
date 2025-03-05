@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Container, Typography, Paper, Table, TableBody, TableCell,
+    Container,
+    Typography,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
     TableContainer,
     TableHead,
     TableRow,
@@ -17,9 +22,6 @@ import {
     Grid,
     Card,
     CardContent,
-    List,
-    ListItem,
-    ListItemText,
     Tab,
     Tabs,
     useTheme,
@@ -32,9 +34,6 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import CreditCardIcon from '@mui/icons-material/CreditCard';
-import HomeIcon from '@mui/icons-material/Home';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import StarIcon from '@mui/icons-material/Star';
 import MapIcon from '@mui/icons-material/Map';
 import { styled } from '@mui/material/styles';
@@ -52,7 +51,6 @@ const cacheRtl = createCache({
 
 // ערכת נושא מותאמת עם RTL
 const rtlTheme = createTheme({
-    direction: 'rtl',
     palette: {
         primary: {
             main: '#1e4b8c', // כחול כהה בנקאי
@@ -66,14 +64,13 @@ const rtlTheme = createTheme({
         },
         background: {
             default: '#f5f7fa',
-            paper: '#ffffff',
+            paper: '#fffff',
         },
         text: {
             primary: '#2c3e50',
             secondary: '#546e7a',
         },
     },
-    // תגית טקסט מותאמת עם RTL  
     typography: {
         fontFamily: '"Heebo", "Roboto", "Arial", sans-serif',
         h1: {
@@ -131,36 +128,18 @@ const rtlTheme = createTheme({
     },
 });
 
-// תאי טבלה מעוצבים
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    fontWeight: 'bold',
-    '&.MuiTableCell-head': {
-        backgroundColor: theme.palette.primary.main,
-        color: theme.palette.common.white,
-        fontSize: '0.95rem',
-    },
-}));
-
-// שורות טבלה מעוצבות
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
-        backgroundColor: theme.palette.action.hover,
-    },
-    '&:hover': {
-        backgroundColor: 'rgba(30, 75, 140, 0.04)',
-    },
-    transition: 'background-color 0.2s',
-}));
-
 // כרטיס מעוצב
 const StyledCard = styled(Card)(({ theme }) => ({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
     transition: 'transform 0.2s, box-shadow 0.2s',
+    backgroundColor: '#eadec1',
     '&:hover': {
         transform: 'translateY(-5px)',
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+        backgroundColor: '#e9d0ab',
+
     }
 }));
 
@@ -176,47 +155,11 @@ const SectionTitle = styled(Typography)(({ theme }) => ({
         width: '60px',
         height: '4px',
         bottom: 0,
-        right: 0,
+        left: 0,
         backgroundColor: theme.palette.primary.main,
         borderRadius: '2px',
     }
 }));
-
-// סמל בנק
-const BankLogo = styled('img')(({ theme }) => ({
-    width: '70px',
-    height: '40px',
-    objectFit: 'contain',
-    marginBottom: theme.spacing(1),
-}));
-
-// יצירת נתוני הטבלה לתכונות
-const createFeatureRow = (feature, description, status) => {
-    return { feature, description, status };
-};
-
-const featureRows = [
-    createFeatureRow(
-        'שילוב עם API של בנק ישראל',
-        'השוואת עמלות בין בנקים שונים בזמן אמת',
-        'פעיל'
-    ),
-    createFeatureRow(
-        'הצגת ריביות',
-        'מידע מעודכן על ריביות משכנתאות והלוואות',
-        'פעיל'
-    ),
-    createFeatureRow(
-        'המלצות מותאמות אישית',
-        'המלצות פיננסיות בהתאם להיסטוריית ההוצאות של המשתמש',
-        'פעיל'
-    ),
-    createFeatureRow(
-        'ניתוח המרות מט״ח',
-        'שילוב עם API של שערי מטבע לניתוח כדאיות המרות',
-        'פעיל'
-    ),
-];
 
 // נתוני השוואה מפורטים בין בנקים
 const bankComparisonData = [
@@ -310,8 +253,8 @@ const exchangeRates = [
 
 function Bank() {
     const [branchData, setBranchData] = useState([]);
+    const [filteredBranchData, setFilteredBranchData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(1);
     const [selectedBank, setSelectedBank] = useState('');
@@ -320,11 +263,7 @@ function Bank() {
     const [uniqueCities, setUniqueCities] = useState([]);
     const [totalRecords, setTotalRecords] = useState(0);
     const itemsPerPage = 15;
-    const [apiResults, setApiResults] = useState(null);
-    const [totalResults, setTotalResults] = useState(0);
-    const [apiSearchTerm, setApiSearchTerm] = useState('');
     const [tabValue, setTabValue] = useState(0);
-
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -332,7 +271,6 @@ function Bank() {
     const fetchAllBranchData = async () => {
         try {
             setLoading(true);
-            // קבלת סך הכל רשומות
             const countResponse = await fetch(
                 'https://data.gov.il/api/3/action/datastore_search?resource_id=1c5bc716-8210-4ec7-85be-92e6271955c2&limit=0'
             );
@@ -340,7 +278,6 @@ function Bank() {
             const total = countData.result.total;
             setTotalRecords(total);
 
-            // נטען את הנתונים בקבוצות של 1000
             let allRecords = [];
             const batchSize = 1000;
             const batches = Math.ceil(Math.min(total, 5000) / batchSize);
@@ -361,8 +298,8 @@ function Bank() {
             }
 
             setBranchData(allRecords);
+            setFilteredBranchData(allRecords);
 
-            // יצירת רשימות ייחודיות לסינון
             const banks = [...new Set(allRecords.map(branch => branch.Bank_Name).filter(Boolean))].sort();
             const cities = [...new Set(allRecords.map(branch => branch.City).filter(Boolean))].sort();
 
@@ -370,50 +307,7 @@ function Bank() {
             setUniqueCities(cities);
 
         } catch (err) {
-            setError(err.message);
             console.error('שגיאה בטעינת נתוני הבנקים:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // פונקציה לחיפוש ב-API חיצוני
-    const searchAPI = async () => {
-        if (!apiSearchTerm.trim()) {
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-
-        try {
-            // הגדרת פרמטרים לחיפוש
-            const searchParams = new URLSearchParams({
-                resource_id: '2202bada-4baf-45f5-aa61-8c5bad9646d3',
-                limit: 20,
-                q: apiSearchTerm
-            });
-
-            // ביצוע הבקשה
-            const response = await fetch(
-                `https://data.gov.il/api/3/action/datastore_search?${searchParams.toString()}`
-            );
-
-            if (!response.ok) {
-                throw new Error('בעיה בחיפוש הנתונים');
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                setApiResults(data.result.records);
-                setTotalResults(data.result.total);
-            } else {
-                throw new Error('בקשת API לא הצליחה');
-            }
-        } catch (err) {
-            setError(err.message);
-            console.error('שגיאה בחיפוש:', err);
         } finally {
             setLoading(false);
         }
@@ -424,222 +318,26 @@ function Bank() {
         fetchAllBranchData();
     }, []);
 
-    // פילטור הנתונים לפי חיפוש והגדרות סינון
-    const filteredBranches = branchData.filter(branch => {
-        // סינון לפי חיפוש טקסטואלי
-        const searchMatch = searchTerm === '' ||
-            (branch.Bank_Name && branch.Bank_Name.includes(searchTerm)) ||
-            (branch.Branch_Name && branch.Branch_Name.includes(searchTerm)) ||
-            (branch.City && branch.City.includes(searchTerm)) ||
-            (branch.Street && branch.Street.includes(searchTerm)) ||
-            (branch.Branch_Code && branch.Branch_Code.toString().includes(searchTerm));
-
-        // סינון לפי בנק נבחר
-        const bankMatch = selectedBank === '' || (branch.Bank_Name === selectedBank);
-
-        // סינון לפי עיר
-        const cityMatch = selectedCity === '' || (branch.City === selectedCity);
-
-        return searchMatch && bankMatch && cityMatch;
-    });
-
-    // חישוב עמודים
-    const totalPages = Math.ceil(filteredBranches.length / itemsPerPage);
-    const displayedBranches = filteredBranches.slice(
-        (page - 1) * itemsPerPage,
-        page * itemsPerPage
-    );
-
-    // טיפול בשינוי עמוד
-    const handlePageChange = (event, value) => {
-        setPage(value);
-    };
-
-    // טיפול בשינוי בשדה החיפוש
-    const handleSearchChange = (event) => {
-        setSearchTerm(event.target.value);
-        setPage(1); // חזרה לעמוד הראשון בעת חיפוש חדש
-    };
-
-    // טיפול בשינוי בשדה החיפוש API
-    const handleApiSearchChange = (event) => {
-        setApiSearchTerm(event.target.value);
-    };
-
-    // טיפול בלחיצה על מקש Enter בשדה החיפוש API
-    const handleApiKeyPress = (event) => {
-        if (event.key === 'Enter') {
-            searchAPI();
-        }
-    };
-
-    // טיפול בשינוי בבחירת בנק
-    const handleBankChange = (event) => {
-        setSelectedBank(event.target.value);
-        setPage(1);
-    };
-
-    // טיפול בשינוי בבחירת עיר
-    const handleCityChange = (event) => {
-        setSelectedCity(event.target.value);
-        setPage(1);
-    };
-
-    // ניקוי כל המסננים
-    const clearFilters = () => {
-        setSearchTerm('');
-        setSelectedBank('');
-        setSelectedCity('');
-        setPage(1);
-    };
-
-    // הצגת תוצאות ה-API
-    const renderAPIResults = () => {
-        if (!apiResults) {
-            return (
-                <Typography variant="body1" sx={{ textAlign: 'center', my: 2 }}>
-                    הזן מונח חיפוש כדי לקבל תוצאות
-                </Typography>
-            );
-        }
-
-        if (apiResults.length === 0) {
-            return (
-                <Typography variant="body1" sx={{ textAlign: 'center', my: 2 }}>
-                    לא נמצאו תוצאות עבור "{apiSearchTerm}"
-                </Typography>
-            );
-        }
-
-        return (
-            <>
-                <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                    נמצאו {totalResults} תוצאות עבור "{apiSearchTerm}"
-                </Typography>
-                <Grid container spacing={2}>
-                    {apiResults.map((result, index) => (
-                        <Grid item xs={12} md={6} key={index}>
-                            <StyledCard>
-                                <CardContent>
-                                    <Typography variant="h6" component="div" gutterBottom>
-                                        {result.Bank_Name || 'לא ידוע'} - {result.Branch_Name || 'לא ידוע'}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                                        {result.City ? `עיר: ${result.City}` : ''}
-                                        {result.Street ? `, רחוב: ${result.Street}` : ''}
-                                        {result.House_Number ? ` ${result.House_Number}` : ''}
-                                    </Typography>
-                                    <List dense>
-                                        {result.Branch_Code && (
-                                            <ListItem>
-                                                <ListItemText primary={`קוד סניף: ${result.Branch_Code}`} />
-                                            </ListItem>
-                                        )}
-                                        {result.Telephone && (
-                                            <ListItem>
-                                                <ListItemText primary={`טלפון: ${result.Telephone}`} />
-                                            </ListItem>
-                                        )}
-                                        {result.Fax && (
-                                            <ListItem>
-                                                <ListItemText primary={`פקס: ${result.Fax}`} />
-                                            </ListItem>
-                                        )}
-                                        {result.Free_Telephone && (
-                                            <ListItem>
-                                                <ListItemText primary={`מספר חינם: ${result.Free_Telephone}`} />
-                                            </ListItem>
-                                        )}
-                                        {result.Handicap_Access && (
-                                            <ListItem>
-                                                <ListItemText primary={`גישה לנכים: ${result.Handicap_Access ? 'יש' : 'אין'}`} />
-                                            </ListItem>
-                                        )}
-                                    </List>
-                                </CardContent>
-                            </StyledCard>
-                        </Grid>
-                    ))}
-                </Grid>
-            </>
-        );
-    };
-
     // טיפול בשינוי טאב
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
     };
 
     return (
+        // טופס חיפוש מטבע  
         <CacheProvider value={cacheRtl}>
             <ThemeProvider theme={rtlTheme}>
-                <Box sx={{ backgroundColor: 'background.default', minHeight: '100vh', pb: 8 }}>
-                    {/* Hero Banner */}
-                    <Box
-                        sx={{
-                            backgroundColor: '#0a2d5e',
-                            backgroundImage: 'linear-gradient(135deg, #0a2d5e 0%, #1e4b8c 50%, #3068c4 100%)',
-                            color: 'white',
-                            pt: 8,
-                            pb: 6,
-                            borderRadius: '0 0 20px 20px',
-                            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
-                            textAlign: 'center',
-                            position: 'relative',
-                            overflow: 'hidden'
-                        }}
-                    >
-                        {/* כאן אפשר להוסיף אפקט ויזואלי שמייצר מעין "גלים" בנקאיים */}
-                        <Box
-                            sx={{
-                                position: 'absolute',
-                                bottom: 0,
-                                left: 0,
-                                width: '100%',
-                                height: '70px',
-                                backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent)',
-                                backgroundSize: '50px 50px',
-                                opacity: 0.2
-                            }}
-                        />
-
-                        {/* תוכן הכותרת */}
-                        <Container>
-                            <Typography
-                                component="h1"
-                                variant="h2"
-                                color="inherit"
-                                gutterBottom
-                                sx={{ fontWeight: 700 }}
-                            >
-                                ניהול והשוואת בנקים
-                            </Typography>
-                            <Typography variant="h5" color="inherit" paragraph sx={{ mb: 4, maxWidth: '800px', mx: 'auto' }}>
-                                קבל מידע מקיף על בנקים בישראל, השווה תנאים ומצא את הבנק המתאים עבורך
-                            </Typography>
-                            <Button
-                                variant="contained"
-                                color="secondary"
-                                size="large"
-                                sx={{
-                                    px: 4,
-                                    py: 1.5,
-                                    fontSize: '1.1rem',
-                                    fontWeight: 'bold',
-                                    boxShadow: '0 8px 16px rgba(230, 57, 70, 0.3)',
-                                    '&:hover': {
-                                        boxShadow: '0 12px 20px rgba(230, 57, 70, 0.4)',
-                                    }
-                                }}
-                            >
-                                התחל להשוות
-                            </Button>
-                        </Container>
-                    </Box>
+                <Box sx={{ minHeight: '100vh', pb: 8, marginTop: '0px', backgroundColor: '#fff9eb' }}>
 
                     <Container>
                         {/* טאבים לניווט */}
-                        <Paper sx={{ mb: 4, borderRadius: '12px', overflow: 'hidden' }}>
+                        <Paper sx={{
+                            mb: 4,
+                            borderRadius: '0 0 12px 12px',
+                            overflow: 'hidden',
+                            backgroundColor: '#658285',
+                            boxShadow: 'none'
+                        }}>
                             <Tabs
                                 value={tabValue}
                                 onChange={handleTabChange}
@@ -649,11 +347,8 @@ function Bank() {
                                 indicatorColor="primary"
                                 aria-label="תפריט נושאים בנקאיים"
                             >
-                                <Tab icon={<AccountBalanceIcon />} label="השוואת בנקים" />
-                                <Tab icon={<MapIcon />} label="איתור סניפים" />
-                                <Tab icon={<AttachMoneyIcon />} label="ריביות ועמלות" />
-                                <Tab icon={<CreditCardIcon />} label="כרטיסי אשראי" />
-                                <Tab icon={<HomeIcon />} label="משכנתאות" />
+                                <Tab sx={{ color: '#e9d0ab' }} icon={<AccountBalanceIcon />} label="השוואת בנקים" />
+                                <Tab sx={{ color: '#e9d0ab' }} icon={<MapIcon />} label="איתור סניפים" />
                             </Tabs>
                         </Paper>
 
@@ -669,10 +364,10 @@ function Bank() {
                                         <Grid container spacing={2}>
                                             {exchangeRates.map((currency, index) => (
                                                 <Grid item xs={6} sm={3} key={index}>
-                                                    <StyledCard>
+                                                    <StyledCard sx={{ backgroundColor: '#e9d0ab' }}>
                                                         <CardHeader
                                                             avatar={
-                                                                <Avatar sx={{ bgcolor: 'primary.light' }}>
+                                                                <Avatar sx={{ bgcolor: 'primary.light', color: '#e9d0ab', backgroundColor: '#658285' }}>
                                                                     {currency.code.substring(0, 1)}
                                                                 </Avatar>
                                                             }
@@ -704,24 +399,32 @@ function Bank() {
                                             טבלה זו מציגה השוואה מקיפה בין הבנקים המובילים בישראל. הנתונים מתעדכנים מדי חודש.
                                         </Typography>
 
-                                        <TableContainer component={Paper} sx={{ mb: 4, overflow: 'auto', boxShadow: '0 6px 20px rgba(0, 0, 0, 0.08)' }}>
+                                        <TableContainer component={Paper}
+                                            sx={{
+                                                mb: 4, overflow: 'auto',
+                                                boxShadow: '0 6px 20px #658285',
+                                                backgroundColor: '#e9d0ab',
+                                                '& .MuiTableCell-root': {
+                                                }
+                                            }}>
                                             <Table aria-label="טבלת השוואת בנקים מפורטת">
                                                 <TableHead>
-                                                    <TableRow>
-                                                        <StyledTableCell>בנק</StyledTableCell>
-                                                        <StyledTableCell>חשבון עו"ש</StyledTableCell>
-                                                        <StyledTableCell>חסכונות</StyledTableCell>
-                                                        <StyledTableCell>משכנתאות</StyledTableCell>
-                                                        <StyledTableCell>הלוואות</StyledTableCell>
-                                                        <StyledTableCell>כרטיסי אשראי</StyledTableCell>
-                                                        <StyledTableCell>שירותים דיגיטליים</StyledTableCell>
-                                                        <StyledTableCell>שירות לקוחות</StyledTableCell>
-                                                        <StyledTableCell>ציון כללי</StyledTableCell>
+                                                    <TableRow sx={{ backgroundColor: '#658285' }}>
+                                                        <TableCell sx={{ color: '#e9d0ab' }}>בנק</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab' }}>חשבון עו"ש</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab' }}>חסכונות</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab' }}>משכנתאות</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab' }}>הלוואות</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab' }}>כרטיסי אשראי</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab' }}>שירותים דיגיטליים</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab' }}>שירות לקוחות</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab' }}>דירוג כללי</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab' }}>ציון כללי</TableCell>
                                                     </TableRow>
                                                 </TableHead>
                                                 <TableBody>
                                                     {bankComparisonData.map((bank, index) => (
-                                                        <StyledTableRow key={index}>
+                                                        <TableRow key={index}>
                                                             <TableCell>
                                                                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                                                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
@@ -731,7 +434,8 @@ function Bank() {
                                                                         width: 40,
                                                                         height: 40,
                                                                         bgcolor: 'primary.main',
-                                                                        color: 'white'
+                                                                        color: '#fff9eb',
+                                                                        backgroundColor: '#658285'
                                                                     }}>
                                                                         {bank.bank.charAt(0)}
                                                                     </Avatar>
@@ -791,7 +495,7 @@ function Bank() {
                                                                                 key={i}
                                                                                 sx={{
                                                                                     fontSize: '16px',
-                                                                                    color: i < Math.floor(bank.digitalServices.app) ? 'gold' : 'grey.300'
+                                                                                    color: i < Math.floor(bank.digitalServices.app) ? '#658285' : '#fff9eb'
                                                                                 }}
                                                                             />
                                                                         ))}
@@ -809,7 +513,7 @@ function Bank() {
                                                                                 key={i}
                                                                                 sx={{
                                                                                     fontSize: '16px',
-                                                                                    color: i < Math.floor(bank.digitalServices.website) ? 'gold' : 'grey.300'
+                                                                                    color: i < Math.floor(bank.digitalServices.website) ? '#658285' : '#fff9eb'
                                                                                 }}
                                                                             />
                                                                         ))}
@@ -827,7 +531,7 @@ function Bank() {
                                                                                 key={i}
                                                                                 sx={{
                                                                                     fontSize: '16px',
-                                                                                    color: i < Math.floor(bank.customerService.rating) ? 'gold' : 'grey.300'
+                                                                                    color: i < Math.floor(bank.customerService.rating) ? '#658285' : '#fff9eb'
                                                                                 }}
                                                                             />
                                                                         ))}
@@ -838,7 +542,7 @@ function Bank() {
                                                                 </Typography>
                                                             </TableCell>
                                                             <TableCell>
-                                                                <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main', textAlign: 'center' }}>
+                                                                <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#658285', textAlign: 'center' }}>
                                                                     {bank.score}
                                                                 </Typography>
                                                                 <LinearProgress
@@ -847,11 +551,11 @@ function Bank() {
                                                                     sx={{
                                                                         height: 8,
                                                                         borderRadius: 4,
-                                                                        backgroundColor: 'grey.200',
+                                                                        backgroundColor: '#fff9eb',
                                                                         '& .MuiLinearProgress-bar': {
                                                                             borderRadius: 4,
-                                                                            backgroundColor: bank.score >= 4 ? 'success.main' :
-                                                                                bank.score >= 3 ? 'warning.main' : 'error.main',
+                                                                            backgroundColor: bank.score >= 4 ? '#658285' :
+                                                                                bank.score >= 3 ? '#658285' : '#658285',
                                                                         }
                                                                     }}
                                                                 />
@@ -859,7 +563,7 @@ function Bank() {
                                                                     מתוך 5
                                                                 </Typography>
                                                             </TableCell>
-                                                        </StyledTableRow>
+                                                        </TableRow>
                                                     ))}
                                                 </TableBody>
                                             </Table>
@@ -868,7 +572,7 @@ function Bank() {
                                 </>
                             )}
                         </div>
-
+                        {/* איתור סניפים */}
                         <div role="tabpanel" hidden={tabValue !== 1}>
                             {tabValue === 1 && (
                                 <>
@@ -876,7 +580,7 @@ function Bank() {
                                         איתור סניפי בנקים
                                     </SectionTitle>
 
-                                    <Paper sx={{ p: 3, mb: 4, borderRadius: '12px' }}>
+                                    <Paper sx={{ p: 3, mb: 4, borderRadius: '12px', backgroundColor: '#e9d0ab' }}>
                                         <Grid container spacing={2} alignItems="center">
                                             <Grid item xs={12} md={4}>
                                                 <FormControl fullWidth variant="outlined">
@@ -936,15 +640,35 @@ function Bank() {
                                                     setSelectedBank('');
                                                     setSelectedCity('');
                                                     setSearchTerm('');
+                                                    setFilteredBranchData(branchData);
+                                                    setPage(1);
                                                 }}
                                                 variant="outlined"
+                                                sx={{ backgroundColor: '#658285', color: '#fff9eb' }}
                                             >
                                                 נקה חיפוש
                                             </Button>
                                             <Button
                                                 startIcon={<SearchIcon />}
                                                 variant="contained"
-                                                color="primary"
+                                                sx={{ backgroundColor: '#658285', color: '#fff9eb' }}
+                                                onClick={() => {
+                                                    const filtered = branchData.filter(branch => {
+                                                        const bankMatch = !selectedBank || branch.Bank_Name === selectedBank;
+                                                        const cityMatch = !selectedCity || branch.City === selectedCity;
+                                                        const searchMatch = !searchTerm ||
+                                                            branch.Bank_Name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                            branch.Branch_Name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                            branch.City?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                            branch.Street?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                                            branch.Branch_Code?.toString().includes(searchTerm);
+
+                                                        return bankMatch && cityMatch && searchMatch;
+                                                    });
+
+                                                    setFilteredBranchData(filtered);
+                                                    setPage(1);
+                                                }}
                                             >
                                                 חפש סניפים
                                             </Button>
@@ -962,14 +686,14 @@ function Bank() {
                                             </Box>
                                         ) : (
                                             <>
-                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, color: '#658285' }}>
                                                     <Typography variant="subtitle1">
-                                                        נמצאו {branchData.length} סניפים
+                                                        נמצאו {filteredBranchData.length} סניפים
                                                         {(selectedBank || selectedCity || searchTerm) ? ' (מסוננים)' : ''}
                                                     </Typography>
 
                                                     <Chip
-                                                        label={`מציג סניפים ${page * itemsPerPage - itemsPerPage + 1} - ${Math.min(page * itemsPerPage, branchData.length)} מתוך ${branchData.length}`}
+                                                        label={`מציג סניפים ${page * itemsPerPage - itemsPerPage + 1} - ${Math.min(page * itemsPerPage, filteredBranchData.length)} מתוך ${filteredBranchData.length}`}
                                                         variant="outlined"
                                                         size="small"
                                                         color="primary"
@@ -977,12 +701,12 @@ function Bank() {
                                                 </Box>
 
                                                 <Grid container spacing={2}>
-                                                    {branchData.slice((page - 1) * itemsPerPage, page * itemsPerPage).map((branch, index) => (
+                                                    {filteredBranchData.slice((page - 1) * itemsPerPage, page * itemsPerPage).map((branch, index) => (
                                                         <Grid item xs={12} sm={6} md={4} key={index}>
                                                             <StyledCard>
                                                                 <CardHeader
                                                                     avatar={
-                                                                        <Avatar sx={{ bgcolor: 'primary.main' }}>
+                                                                        <Avatar sx={{ bgcolor: 'primary.main', color: '#fff9eb', backgroundColor: '#658285' }}>
                                                                             {branch.Bank_Name ? branch.Bank_Name.substring(0, 1) : 'B'}
                                                                         </Avatar>
                                                                     }
@@ -1001,7 +725,7 @@ function Bank() {
                                                                             size="small"
                                                                             label="גישה לנכים"
                                                                             color="success"
-                                                                            sx={{ mt: 1 }}
+                                                                            sx={{ mt: 1, backgroundColor: '#658285', color: '#fff9eb' }}
                                                                         />
                                                                     )}
                                                                 </CardContent>
@@ -1012,7 +736,7 @@ function Bank() {
 
                                                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                                                     <Pagination
-                                                        count={Math.ceil(branchData.length / itemsPerPage)}
+                                                        count={Math.ceil(filteredBranchData.length / itemsPerPage)}
                                                         page={page}
                                                         onChange={(e, newPage) => setPage(newPage)}
                                                         color="primary"
@@ -1028,11 +752,10 @@ function Bank() {
                             )}
                         </div>
 
-                        {/* המשך התוכן לטאבים נוספים... */}
                     </Container>
                 </Box>
             </ThemeProvider>
-        </CacheProvider>
+        </CacheProvider >
     );
 }
 

@@ -16,7 +16,9 @@ export default function Home() {
                     sx={{
                         mb: 4,
                         color: '#658285',
-                        fontWeight: 'bold'
+                        fontWeight: 'bold',
+                        marginTop: '0px',
+                        fontSize: '50px'
                     }}
                 >
                     ברוכים הבאים לניהול המשק בית שלכם
@@ -43,7 +45,7 @@ export default function Home() {
                             <AccountBalanceWalletIcon sx={{ fontSize: 60, color: '#4caf50', mb: 2 }} />
                             <NavLink to="/income-expenses" style={{ textDecoration: 'none' }}>
                                 <Typography variant="h4" sx={{ mb: 2, color: '#2e7d32' }}>
-                                    !ניהול הכנסות והוצאות
+                                    ניהול הכנסות והוצאות!
                                 </Typography>
                                 <Typography variant="body1" sx={{ color: '#1b5e20' }}>
                                     נהלו את התקציב שלכם בקלות עם מעקב אחר הכנסות והוצאות
@@ -67,11 +69,11 @@ export default function Home() {
                                 }
                             }}
                         >
-
+                            {/* כפתור שמפנה למסך הטיפים */}
                             <TipsAndUpdatesIcon sx={{ fontSize: 60, color: '#1976d2', mb: 2 }} />
-                            <NavLink to="/tips" style={{ textDecoration: 'none' }}>
+                            <NavLink to="/bank" style={{ textDecoration: 'none' }}>
                                 <Typography variant="h4" sx={{ mb: 2, color: '#1565c0' }}>
-                                    !טיפים לחיסכון
+                                    טיפים לחיסכון!
                                 </Typography>
                                 <Typography variant="body1" sx={{ color: '#0d47a1' }}>
                                     גלו טיפים מועילים לחיסכון וניהול כספים נכון
@@ -82,25 +84,17 @@ export default function Home() {
                 </Grid>
 
                 {/* מידע נוסף */}
-                <Box sx={{ mt: 6, textAlign: 'center' }}>
+                <Box sx={{ mt: 6, textAlign: 'center', marginTop: '100px' }}>
                     <Typography variant="h5" sx={{ mb: 2, color: '#658285' }}>
-                        התחילו לנהל את הכספים שלכם בצורה חכמה
+                        התחילו לנהל את הכספים שלכם בצורה חכמה!
                     </Typography>
                     <Typography variant="body1" sx={{ color: '#658285' }}>
-                        ,עם הכלים שלנו, תוכלו לעקוב אחר ההוצאות וההכנסות שלכם
+                        עם הכלים שלנו, תוכלו לעקוב אחר ההוצאות וההכנסות שלכם,
                         <br />
-                        .לקבל תובנות על דפוסי ההוצאות שלכם ולקבל טיפים לחיסכון
+                        לקבל תובנות על דפוסי ההוצאות שלכם ולקבל טיפים לחיסכון.
                     </Typography>
                 </Box>
             </Box>
         </Container >
     );
 }
-
-
-
-
-
-
-
-
