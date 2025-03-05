@@ -10,6 +10,7 @@ import Reminders from './components/Reminders'
 import { useContext } from 'react';
 import { UserContext } from './components/UserContext';
 import Bank from './components/Bank'
+import Tasks from './components/Tasks';
 // קומפוננטת ProtectedRoute שתבדוק אם המשתמש מחובר
 const ProtectedRoute = ({ children }) => {//מגן על הדף מכך שהמשתמש לא יכול להגיע לדף זה אם לא מחובר
   const { user } = useContext(UserContext);//מציאת המשתמש מהקונסטקט
@@ -52,8 +53,13 @@ function App() {
               <Bank />
             </ProtectedRoute>
           } />
+          <Route path='/tasks' element={
+            <ProtectedRoute>
+              <Tasks/>
+            </ProtectedRoute>
+          } />
 
-          {/* דף הבית - נגיש לכולם */}
+         /* דף הבית - נגיש לכולם */
           <Route path="/" element={<Home />} />
 
           {/* הפניה לדף הבית עבור נתיבים לא קיימים */}

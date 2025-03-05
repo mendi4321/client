@@ -23,7 +23,8 @@ const pages = [
     { name: 'הכנסות', path: '/income' },
     { name: 'הוצאות', path: '/expenses' },
     { name: 'תזכורות', path: '/reminders' },
-    { name: 'בנק', path: '/bank' }
+    { name: 'בנק', path: '/bank' },
+    { name: 'מטלות', path: '/tasks'}
 ];
 export default function UpperBar() {
     const [anchorElNav, setAnchorElNav] = useState(null);
