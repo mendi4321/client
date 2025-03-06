@@ -27,7 +27,7 @@ export async function addTasks(task) {
         if (!userData || !userData.id) {
             throw new Error('נתוני המשתמש חסרים. אנא התחבר מחדש.');
         }
-        
+
         const taskData = {
             title: task.title,
             description: task.description,
@@ -96,3 +96,4 @@ export async function getUsers() {
     const data = await response.json();
     return data;
 }
+

@@ -1,16 +1,17 @@
-import { useState } from 'react';
-import { Modal, Box, Typography, Button, Stack, TextField } from '@mui/material';
+import React, { useState, useContext } from 'react';
+import { Modal, Box, Typography, Button, Stack, TextField, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { register } from '../api/users';
-import { useContext } from 'react';
 import { UserContext } from './UserContext';
+import dayjs from 'dayjs';
+import 'dayjs/locale/he'; // ייבוא לוקאל עברית
 
 // מספר המשתמש המחובר
 const userKeys = ['firstName', 'lastName', 'email', 'password', 'birthday'];
 // מסך ההרשמה
-export default function RegisterModal(props) {
+export default function RegisterModal({ open, onClose }) {
     const [userInfo, setUserInfo] = useState({});
     const [error, setError] = useState({});
     const [serverError, setServerError] = useState('');
@@ -61,7 +62,7 @@ export default function RegisterModal(props) {
         register(user)
             .then(({ data, token }) => {
                 logUser(data, token);
-                props.onClose();
+                onClose();
             })
             .catch((error) => {
                 setServerError(error.message);
@@ -72,7 +73,7 @@ export default function RegisterModal(props) {
 
     // מסך ההרשמה
     return (
-        <Modal open={props.open} onClose={props.onClose}>
+        <Modal open={open} onClose={onClose}>
             <Box sx={{
                 padding: '8px',
                 position: 'absolute',
@@ -153,12 +154,17 @@ export default function RegisterModal(props) {
                         }}
                     />
                     {/* שדה התאריך */}
-                    <BirthDatePicker
-                        value={userInfo.birthday || null}
-                        onChange={handleChange}
-                        error={!!error.birthday}
-                        disabled={Loaging}
-                    />
+                    <Grid item xs={12}>
+                        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="he">
+                            <DatePicker
+                                label="תאריך לידה"
+                                value={userInfo.birthday || null}
+                                onChange={(newValue) => handleChange({ target: { name: 'birthday', value: newValue } })}
+                                format="DD/MM/YYYY"
+                                sx={{ width: '100%' }}
+                            />
+                        </LocalizationProvider>
+                    </Grid>
                     {/* שדה הסיסמא */}
                     <TextField
                         required
@@ -242,17 +248,22 @@ export default function RegisterModal(props) {
     );
 }
 // פונקציה שמכילה את המשתמש והטוקן
-function BirthDatePicker(props) {
+function BirthDatePicker({ value, onChange, error, disabled }) {
     return (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="he">
             <DatePicker
-                label='Birthday'
-                value={props.value}
-                onChange={value => props.onChange({ target: { name: 'birthday', value } })}
-                error={!!props.error}
-                helperText={props.error || null}
-                size='small'
-                disabled={props.disabled}
+                label="תאריך לידה"
+                value={value}
+                onChange={(newDate) => onChange({ target: { name: 'birthday', value: newDate } })}
+                slotProps={{
+                    textField: {
+                        fullWidth: true,
+                        error: !!error,
+                        helperText: error,
+                    },
+                }}
+                format="DD/MM/YYYY"
+                disabled={disabled}
             />
         </LocalizationProvider>
     );

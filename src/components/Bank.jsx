@@ -36,6 +36,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import StarIcon from '@mui/icons-material/Star';
 import MapIcon from '@mui/icons-material/Map';
+import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import rtlPlugin from 'stylis-plugin-rtl';
@@ -590,6 +591,13 @@ function Bank() {
                                                         value={selectedBank}
                                                         onChange={(e) => setSelectedBank(e.target.value)}
                                                         label="בחר בנק"
+                                                        MenuProps={{
+                                                            PaperProps: {
+                                                                style: {
+                                                                    backgroundColor: '#fff9eb',
+                                                                },
+                                                            },
+                                                        }}
                                                     >
                                                         <MenuItem value="">כל הבנקים</MenuItem>
                                                         {uniqueBanks.map((bank, index) => (
@@ -606,6 +614,13 @@ function Bank() {
                                                         value={selectedCity}
                                                         onChange={(e) => setSelectedCity(e.target.value)}
                                                         label="בחר עיר"
+                                                        MenuProps={{
+                                                            PaperProps: {
+                                                                style: {
+                                                                    backgroundColor: '#fff9eb',
+                                                                },
+                                                            },
+                                                        }}
                                                     >
                                                         <MenuItem value="">כל הערים</MenuItem>
                                                         {uniqueCities.map((city, index) => (
@@ -751,7 +766,6 @@ function Bank() {
                                 </>
                             )}
                         </div>
-
                     </Container>
                 </Box>
             </ThemeProvider>

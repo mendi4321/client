@@ -24,7 +24,7 @@ const pages = [
     { name: 'הוצאות', path: '/expenses' },
     { name: 'תזכורות', path: '/reminders' },
     { name: 'בנק', path: '/bank' },
-    { name: 'מטלות', path: '/tasks'}
+    { name: 'מטלות', path: '/tasks' }
 ];
 export default function UpperBar() {
     const [anchorElNav, setAnchorElNav] = useState(null);
@@ -47,12 +47,11 @@ export default function UpperBar() {
         <Box sx={{ flexGrow: 1, position: 'sticky', top: 0, zIndex: 1000 }}>
             <AppBar position="static" sx={{ backgroundColor: '#658285' }}>
                 <Container maxWidth="xl">
-                    <Toolbar disableGutters>
+                    <Toolbar disableGutters >
                         {/* לוגו בצד שמאל */}
                         <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
                             <img src="/logo.png" alt="logo" style={{ width: '50px', height: '50px' }} />
                         </Box>
-
                         {/* תפריט נייד (המבורגר) */}
                         <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                             <IconButton size="large" onClick={handleOpenNavMenu} color="inherit">
@@ -68,7 +67,6 @@ export default function UpperBar() {
                                         backgroundColor: '#4a656d'
                                     }
                                 }}
-
                             >
                                 {pages.map((page) => (
                                     <NavLink
@@ -88,17 +86,16 @@ export default function UpperBar() {
                                 ))}
                             </Menu>
                         </Box>
-
                         {/* שם האפליקציה במרכז */}
                         <Typography
-                            variant="h5"
+                            variant="h4"
                             noWrap
                             sx={{
                                 position: 'absolute',
                                 left: '50%',
                                 transform: 'translateX(-50%)',
                                 fontFamily: 'monospace',
-                                fontWeight: 700,
+                                fontWeight: 1000,
                                 letterSpacing: '.3rem',
                                 color: '#e9d0ab',
                                 textDecoration: 'none',
@@ -107,15 +104,13 @@ export default function UpperBar() {
                         >
                             בית בשליטה
                         </Typography>
-
                         {/* תפריט ניווט ראשי למסכים גדולים */}
                         <Box sx={{
                             flexGrow: 1, display: {
                                 xs: 'none', md: 'flex'
                             },
                             justifyContent: 'flex-start',
-                            marginRight: '20px',
-
+                            marginRight: '5px',
                         }}>
                             {pages.map((page) => (
                                 <NavLink
@@ -124,7 +119,8 @@ export default function UpperBar() {
                                     style={({ isActive }) => ({
                                         color: '#e9d0ab',
                                         textDecoration: 'none',
-                                        margin: '0 10px',
+                                        margin: '0 0px',
+                                        fontSize: '20px',
                                         fontWeight: isActive ? 'bold' : 'normal',
                                         borderBottom: isActive ? '2px solid #e9d0ab' : 'none',
                                         padding: '0 15px'

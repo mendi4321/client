@@ -515,7 +515,7 @@ export default function Expenses() {
                                     endAngle: 270,
                                 },
                             ]}
-                            width={400}
+                            width={700}
                             height={400}
                             margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
                             sx={{
@@ -527,6 +527,7 @@ export default function Expenses() {
                                 '& .MuiChartsLegend-mark': {
                                     borderRadius: '5px',
                                     boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                                    transform: 'translate(30px, 0)',
                                 },
                                 '& .MuiChartsLegend-label': {
                                     fontSize: '0.9rem',

@@ -15,6 +15,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { addTransaction } from '../api/transactionApi';
 import dayjs from 'dayjs';
+import 'dayjs/locale/he'; // ייבוא לוקאל עברית
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { styled, alpha } from '@mui/material/styles';
 
@@ -150,12 +151,22 @@ export default function AddTransactionDialog({ open, onClose, type, onSuccess })
                         }}
                     />
                     {/* שדה התאריך */}
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="he">
                         <DatePicker
                             label="תאריך"
                             value={formData.date}
                             onChange={(newDate) => setFormData({ ...formData, date: newDate })}
-                            sx={{ width: '100%' }}
+                            format="DD/MM/YYYY"
+                            sx={{
+                                width: '100%',
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': { borderColor: '#e9d0ab' },
+                                    '&:hover fieldset': { borderColor: '#e9d0ab' },
+                                    '&.Mui-focused fieldset': { borderColor: '#e9d0ab' }
+                                },
+                                '& .MuiInputLabel-root': { color: '#e9d0ab' },
+                                '& .MuiInputBase-input': { color: '#e9d0ab' }
+                            }}
                         />
                     </LocalizationProvider>
                     {type === 'expense' && (

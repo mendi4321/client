@@ -218,7 +218,7 @@ export default function IncomeExpenses() {
             {/* הצגת הסכומים המומרים */}
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 4 }}>
                 <Paper sx={{ p: 2, flex: 1, bgcolor: '#e8f5e9', textAlign: 'center' }}>
-                    <Typography variant="h6">סך הכנסות</Typography>
+                    <Typography variant="h6">סך הכנסות ({dateRangeToDisplay()})</Typography>
                     <Typography variant="h4" sx={{ color: '#4caf50' }}>
                         {getCurrencySymbol(selectedCurrency)}
                         {convertedTotalIncome.toLocaleString(undefined, { maximumFractionDigits: 2 })}
@@ -226,7 +226,7 @@ export default function IncomeExpenses() {
                 </Paper>
 
                 <Paper sx={{ p: 2, flex: 1, bgcolor: '#ffebee', textAlign: 'center' }}>
-                    <Typography variant="h6">סך הוצאות</Typography>
+                    <Typography variant="h6">סך הוצאות ({dateRangeToDisplay()})</Typography>
                     <Typography variant="h4" sx={{ color: '#f44336' }}>
                         {getCurrencySymbol(selectedCurrency)}
                         {convertedTotalExpenses.toLocaleString(undefined, { maximumFractionDigits: 2 })}
@@ -234,7 +234,7 @@ export default function IncomeExpenses() {
                 </Paper>
 
                 <Paper sx={{ p: 2, flex: 1, bgcolor: '#e3f2fd', textAlign: 'center' }}>
-                    <Typography variant="h6">מאזן</Typography>
+                    <Typography variant="h6">מאזן ({dateRangeToDisplay()})</Typography>
                     <Typography variant="h4" sx={{
                         color: convertedTotalIncome - convertedTotalExpenses >= 0 ? '#4caf50' : '#f44336'
                     }}>
@@ -500,6 +500,7 @@ export default function IncomeExpenses() {
                                         fontSize: 14,
                                         fontWeight: 'bold',
                                         fill: '#333',
+                                        transform: 'translate(0, 10px)',
                                     },
                                 },
                                 svg: {

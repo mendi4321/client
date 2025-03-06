@@ -31,7 +31,9 @@ import TodayIcon from '@mui/icons-material/Today';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import EventIcon from '@mui/icons-material/Event';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CalendarAddIcon from '@mui/icons-material/Event';
 import dayjs from 'dayjs';
+import 'dayjs/locale/he'; // ייבוא לוקאל עברית
 import { BASE_URL } from '../api/constance';
 
 // מסך התזכורות של המשתמש   
@@ -205,6 +207,16 @@ export default function Reminders() {
             dueDate: dayjs()
         });
     };
+
+    // פונקציה ליצירת קישור לגוגל קלנדר
+    function createGoogleCalendarUrl(reminder) {
+        const title = encodeURIComponent(reminder.title);
+        const details = encodeURIComponent(`סכום: ₪${reminder.amount}`);
+        const date = dayjs(reminder.dueDate).format('YYYYMMDD');
+
+        return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${date}/${date}&ctz=Asia/Jerusalem`;
+    }
+
     // מסך התזכורות
     return (
         <Container maxWidth="lg">
@@ -357,8 +369,16 @@ export default function Reminders() {
                                                 size="small"
                                                 color="error"
                                                 onClick={() => handleDelete(reminder._id)}
+                                                sx={{ mr: 1 }}
                                             >
                                                 <DeleteIcon />
+                                            </IconButton>
+                                            <IconButton
+                                                size="small"
+                                                color="primary"
+                                                onClick={() => window.open(createGoogleCalendarUrl(reminder), '_blank')}
+                                            >
+                                                <CalendarAddIcon />
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>
@@ -395,11 +415,12 @@ export default function Reminders() {
                                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                                 fullWidth
                             />
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="he">
                                 <DatePicker
                                     label="תאריך"
                                     value={formData.dueDate}
                                     onChange={(newDate) => setFormData({ ...formData, dueDate: newDate })}
+                                    format="DD/MM/YYYY"
                                     sx={{ width: '100%' }}
                                 />
                             </LocalizationProvider>

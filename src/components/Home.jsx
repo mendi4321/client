@@ -11,6 +11,18 @@ export default function Home() {
             <Box sx={{ mt: 4 }}>
                 {/* כותרת ראשית */}
                 <Typography
+                    variant="h4"
+                    align="center"
+                    sx={{
+                        mb: 4,
+                        color: '#658285',
+                        fontWeight: 'bold',
+                        marginTop: '0px',
+                    }}
+                >
+                    ברוכים הבאים לניהול המשק בית שלכם
+                </Typography>
+                <Typography
                     variant="h2"
                     align="center"
                     sx={{
@@ -18,12 +30,10 @@ export default function Home() {
                         color: '#658285',
                         fontWeight: 'bold',
                         marginTop: '0px',
-                        fontSize: '50px'
                     }}
                 >
-                    ברוכים הבאים לניהול המשק בית שלכם
+                    בית בשליטה!
                 </Typography>
-
                 {/* קופסאות מידע */}
                 <Grid container spacing={4} sx={{ mt: 2 }}>
                     {/* קופסת הכנסות/הוצאות */}
@@ -35,6 +45,7 @@ export default function Home() {
                                 textAlign: 'center',
                                 height: '100%',
                                 backgroundColor: '#e8f5e9',
+                                marginTop: '0px',
                                 '&:hover': {
                                     backgroundColor: '#c8e6c9',
                                     cursor: 'pointer'
@@ -84,7 +95,7 @@ export default function Home() {
                 </Grid>
 
                 {/* מידע נוסף */}
-                <Box sx={{ mt: 6, textAlign: 'center', marginTop: '100px' }}>
+                <Box sx={{ mt: 6, textAlign: 'center', marginTop: '75px' }}>
                     <Typography variant="h5" sx={{ mb: 2, color: '#658285' }}>
                         התחילו לנהל את הכספים שלכם בצורה חכמה!
                     </Typography>

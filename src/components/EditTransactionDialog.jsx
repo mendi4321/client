@@ -15,6 +15,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { updateTransaction } from '../api/transactionApi';
 import dayjs from 'dayjs';
+import 'dayjs/locale/he'; // ייבוא לוקאל עברית
 
 // הגדרת הקטגוריות לפי סוג העסקה
 const categories = {
@@ -141,11 +142,12 @@ export default function EditTransactionDialog({ open, onClose, transaction, onSu
                         }}
                     />
                     {/* שדה התאריך */}
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="he">
                         <DatePicker
                             label="תאריך"
                             value={formData.date}
                             onChange={(newDate) => setFormData({ ...formData, date: newDate })}
+                            format="DD/MM/YYYY"
                             sx={{
                                 width: '100%',
                                 '& .MuiOutlinedInput-root': {
