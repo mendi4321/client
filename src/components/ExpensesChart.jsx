@@ -1,150 +1,145 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, lineElementClasses, markElementClasses } from '@mui/x-charts/LineChart';
-import { getTransactions } from '../api/transactionApi';
-import { Box, Typography, ToggleButtonGroup, ToggleButton, CircularProgress } from '@mui/material';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import dayjs from 'dayjs';
+
 // תרשים הוצאות לאורך זמן   
-const ExpensesChart = () => {
-    // מצבים ומשתנים של התרשים
-    const [transactions, setTransactions] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [timeFrame, setTimeFrame] = useState('month');
+const ExpensesChart = ({ filteredTransactions, dateRange, selectedCurrency, getCurrencySymbol, convertedAmounts }) => {
     const [chartData, setChartData] = useState({
         xLabels: [],
         amounts: []
     });
-    // שימוש ב-useEffect לטעינת הנתונים מהשרת   
-    useEffect(() => {
-        const fetchTransactions = async () => {
-            try {
-                setLoading(true);
-                const data = await getTransactions();
-                setTransactions(data);
-                setLoading(false);
-            } catch (err) {
-                setError('שגיאה בטעינת נתוני העסקאות');
-                setLoading(false);
-                console.error('Error fetching transactions:', err);
-            }
-        };
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-        fetchTransactions();
-    }, []);
-
+    // שימוש ב-useEffect להכנת נתונים לתרשים כאשר מתקבלים נתונים חדשים
     useEffect(() => {
-        if (transactions.length > 0) {
-            prepareChartData();
-        }
-    }, [transactions, timeFrame]);
+        prepareChartData();
+    }, [filteredTransactions, dateRange, selectedCurrency, convertedAmounts]);
+
     // פונקציה להכנת נתונים לתרשים  
     const prepareChartData = () => {
-        // עיבוד הנתונים לפי מסגרת הזמן שנבחרה
-        const expenseTransactions = transactions.filter(t => t.type === 'expense');
+        let xLabels = []; // מערך לשמירת התווים בציר ה-X
+        let amounts = []; // מערך לשמירת הסכומים בציר ה-Y  
 
-        let xLabels = [];// מערך לשמירת התווים בציר ה-X
-        let amounts = [];// מערך לשמירת הסכומים בציר ה-Y    
-        // עיבוד לפי מסגרת הזמן שנבחרה  
-        if (timeFrame === 'day') {
-            // קבץ לפי שעות של היום
-            const today = dayjs().startOf('day');
+        const now = dayjs();
 
-            // יצירת מערך של שעות היום
+        if (dateRange === 'day') {
+            // הצגת נתונים לפי שעות ביום
+            const hoursData = {};
+
+            // אתחול מערך השעות מ-0 עד 23
             for (let hour = 0; hour < 24; hour++) {
-                const hourTransactions = expenseTransactions.filter(t => {
-                    const transDate = dayjs(t.date);
-                    return transDate.isAfter(today) &&
-                        transDate.hour() === hour;
-                });
-                // חישוב סכום הוצאות לפי שעה
-                const hourTotal = hourTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-                // הוספת התווים והסכומים למערכים המתאימים   
+                hoursData[hour] = 0;
                 xLabels.push(`${hour}:00`);
-                amounts.push(hourTotal);
             }
-        } else if (timeFrame === 'week') {
-            // קבץ לפי ימי השבוע
-            const daysOfWeek = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
-            // חישוב סכום הוצאות לפי יום
-            for (let i = 0; i < 7; i++) {
-                const day = dayjs().subtract(6 - i, 'day');
-                const dayStart = day.startOf('day');
-                const dayEnd = day.endOf('day');
-                // מסגרת זמן לפי יום
-                const dayTransactions = expenseTransactions.filter(t => {
-                    const transDate = dayjs(t.date);
-                    return transDate.isAfter(dayStart) &&
-                        transDate.isBefore(dayEnd);
-                });
-                // חישוב סכום הוצאות לפי יום
-                const dayTotal = dayTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-                // הוספת התווים והסכומים למערכים המתאימים   
-                xLabels.push(daysOfWeek[day.day()]);
-                amounts.push(dayTotal);
-            }
-        } else if (timeFrame === 'month') {
-            // קבץ לפי שבועות בחודש
 
-            // חלוקה ל-4 שבועות אחורה
-            for (let i = 0; i < 4; i++) {
-                const weekStart = dayjs().subtract(21 - i * 7, 'day');
-                const weekEnd = dayjs(weekStart).add(6, 'day');
-                // מסגרת זמן לפי שבוע
-                const weekTransactions = expenseTransactions.filter(t => {
-                    const transDate = dayjs(t.date);
-                    return transDate.isAfter(weekStart) &&
-                        transDate.isBefore(weekEnd);
-                });
-                // חישוב סכום הוצאות לפי שבוע
-                const weekTotal = weekTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-                // הוספת התווים והסכומים למערכים המתאימים           
-                xLabels.push(`שבוע ${i + 1}`);
-                amounts.push(weekTotal);
-            }
-        } else if (timeFrame === 'year') {
-            // קבץ לפי חודשי השנה האחרונה
+            // חישוב סכום הוצאות לפי שעה
+            filteredTransactions.forEach(transaction => {
+                const transactionDate = dayjs(transaction.date);
+                const hour = transactionDate.hour();
+
+                const amount = selectedCurrency === 'ILS'
+                    ? Number(transaction.amount)
+                    : convertedAmounts[transaction._id] || Number(transaction.amount);
+
+                hoursData[hour] += amount;
+            });
+
+            // יצירת מערך הסכומים לפי סדר השעות
+            amounts = Object.values(hoursData);
+
+        } else if (dateRange === 'week') {
+            // הצגת נתונים לפי ימי השבוע
+            const daysOfWeek = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+            const daysData = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+
+            xLabels = [...daysOfWeek];
+
+            // חישוב סכום הוצאות לפי יום בשבוע
+            filteredTransactions.forEach(transaction => {
+                const transactionDate = dayjs(transaction.date);
+                const dayOfWeek = transactionDate.day(); // 0-6, כאשר 0 = ראשון
+
+                const amount = selectedCurrency === 'ILS'
+                    ? Number(transaction.amount)
+                    : convertedAmounts[transaction._id] || Number(transaction.amount);
+
+                daysData[dayOfWeek] += amount;
+            });
+
+            // יצירת מערך הסכומים לפי סדר הימים
+            amounts = Object.values(daysData);
+
+        } else if (dateRange === 'month') {
+            // הצגת נתונים לפי שבועות בחודש
+            xLabels = ['שבוע 1', 'שבוע 2', 'שבוע 3', 'שבוע 4', 'שבוע 5'];
+            const weekData = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
+
+            // חישוב סכום הוצאות לפי שבוע בחודש
+            filteredTransactions.forEach(transaction => {
+                const transactionDate = dayjs(transaction.date);
+
+                // חישוב מספר השבוע בחודש (0-4)
+                const dayOfMonth = transactionDate.date(); // 1-31
+                const weekOfMonth = Math.floor((dayOfMonth - 1) / 7);
+
+                const amount = selectedCurrency === 'ILS'
+                    ? Number(transaction.amount)
+                    : convertedAmounts[transaction._id] || Number(transaction.amount);
+
+                weekData[weekOfMonth] += amount;
+            });
+
+            // יצירת מערך הסכומים לפי סדר השבועות
+            amounts = Object.values(weekData);
+
+        } else if (dateRange === 'year') {
+            // הצגת נתונים לפי חודשים בשנה
             const monthNames = [
                 'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
                 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
             ];
-            // חישוב סכום הוצאות לפי חודש
-            for (let i = 11; i >= 0; i--) {
-                const month = dayjs().subtract(i, 'month');
-                const monthStart = month.startOf('month');
-                const monthEnd = month.endOf('month');
-                // מסגרת זמן לפי חודש
-                const monthTransactions = expenseTransactions.filter(t => {
-                    const transDate = dayjs(t.date);
-                    return transDate.isAfter(monthStart) &&
-                        transDate.isBefore(monthEnd);
-                });
-                // חישוב סכום הוצאות לפי חודש
-                const monthTotal = monthTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-                // הוספת התווים והסכומים למערכים המתאימים               
-                xLabels.push(`${monthNames[month.month()]}`);
-                amounts.push(monthTotal);
+            const monthData = {};
+
+            // אתחול מערך החודשים
+            for (let i = 0; i < 12; i++) {
+                monthData[i] = 0;
+                xLabels.push(monthNames[i]);
             }
+
+            // חישוב סכום הוצאות לפי חודש
+            filteredTransactions.forEach(transaction => {
+                const transactionDate = dayjs(transaction.date);
+                const month = transactionDate.month(); // 0-11
+
+                const amount = selectedCurrency === 'ILS'
+                    ? Number(transaction.amount)
+                    : convertedAmounts[transaction._id] || Number(transaction.amount);
+
+                monthData[month] += amount;
+            });
+
+            // יצירת מערך הסכומים לפי סדר החודשים
+            amounts = Object.values(monthData);
         }
-        // הגדרת הנתונים לתרשים     
+
         setChartData({
             xLabels,
             amounts
         });
     };
-    // פונקציה לשינוי מסגרת הזמן
-    const handleTimeFrameChange = (event, newTimeFrame) => {
-        if (newTimeFrame !== null) {
-            setTimeFrame(newTimeFrame);
-        }
-    };
+
     // טעינת תרשים במצב טעינה
     if (loading) {
         return <CircularProgress />;
     }
+
     // טעינת תרשים במצב שגיאה
     if (error) {
         return <Typography color="error">{error}</Typography>;
     }
+
     // טעינת תרשים במצב מצב טופס    
     return (
         <Box sx={{
@@ -155,7 +150,7 @@ const ExpensesChart = () => {
             <Box sx={{
                 mb: 2,
                 display: 'flex',
-                justifyContent: 'space-between',
+                justifyContent: 'center',
                 alignItems: 'center'
             }}>
                 <Typography
@@ -165,27 +160,6 @@ const ExpensesChart = () => {
                 >
                     תרשים הוצאות לאורך זמן
                 </Typography>
-                <ToggleButtonGroup
-                    value={timeFrame}
-                    exclusive
-                    onChange={handleTimeFrameChange}
-                    aria-label="time frame"
-                    size="small"
-                >
-                    <ToggleButton value="day" aria-label="day">
-                        יום
-                    </ToggleButton>
-                    <ToggleButton value="week" aria-label="week">
-                        שבוע
-                    </ToggleButton>
-                    <ToggleButton value="month" aria-label="month">
-                        חודש
-                    </ToggleButton>
-                    <ToggleButton value="year" aria-label="year">
-                        שנה
-                    </ToggleButton>
-                </ToggleButtonGroup>
-                {/* תיק תיק טופס וכותרת וכפתורים לשינוי מסגרת הזמן */}
             </Box>
             <Box sx={{
                 height: 300,
@@ -197,24 +171,24 @@ const ExpensesChart = () => {
                     series={[
                         {
                             data: chartData.amounts,
-                            label: '',
                             color: '#f44336',
                             id: 'expenseId',
                             showMark: true,
+                            area: true,
                         }
                     ]}
                     xAxis={[{
                         data: chartData.xLabels,
                         scaleType: 'point',
                         tickLabelStyle: {
-                            angle: 0,
-                            textAnchor: 'middle',
+                            angle: 45,
+                            textAnchor: 'start',
                             fontSize: 12,
                             fill: '#658285',
                         },
                     }]}
                     yAxis={[{
-                        label: 'סכום (₪)',
+                        label: `סכום (${getCurrencySymbol(selectedCurrency)})`,
                         labelStyle: {
                             fill: '#658285',
                         },
@@ -227,7 +201,7 @@ const ExpensesChart = () => {
                             strokeWidth: 2,
                         },
                         '.MuiLineElement-series-expenseId': {
-                            strokeDasharray: '5 5',
+                            strokeDasharray: '0',
                         },
                         [`.${markElementClasses.root}:not(.${markElementClasses.highlighted})`]: {
                             fill: '#fff',
@@ -238,21 +212,22 @@ const ExpensesChart = () => {
                             fill: '#f44336',
                         },
                         '& .MuiChartsGrid-root': {
-                            display: 'none',
+                            strokeDasharray: '3 3',
+                            stroke: '#e0e0e0',
                         },
                     }}
                     margin={{
                         left: 60,
                         right: 20,
                         top: 20,
-                        bottom: 30,
+                        bottom: 50,
                     }}
                     disableAxisListener={true}
-                    legend={{ hidden: true }}
+                    tooltip={{ trigger: 'item' }}
                 />
             </Box>
         </Box>
     );
 };
-// ייצוא תרשים הוצאות לאורך זמן כפונקציה    
+
 export default ExpensesChart; 

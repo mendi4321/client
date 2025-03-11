@@ -16,6 +16,8 @@ import { UserContext } from './UserContext';
 import UserCard from './UserCard';
 import { NavLink } from 'react-router-dom';
 
+
+
 // רשימת העמודים עם הנתיבים שלהם
 const pages = [
     { name: 'בית', path: '/' },
@@ -26,6 +28,9 @@ const pages = [
     { name: 'בנק', path: '/bank' },
     { name: 'מטלות', path: '/tasks' }
 ];
+// קישור למנהל מערכת
+const adminPage = { name: 'מנהל מערכת', path: '/admin' };
+
 export default function UpperBar() {
     const [anchorElNav, setAnchorElNav] = useState(null);
     const [anchorElUser, setAnchorElUser] = useState(null);
@@ -49,7 +54,7 @@ export default function UpperBar() {
                 <Container maxWidth="xl">
                     <Toolbar disableGutters >
                         {/* לוגו בצד שמאל */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mr: 2, marginRight: '0' }}>
                             <img src="/logo.png" alt="logo" style={{ width: '50px', height: '50px' }} />
                         </Box>
                         {/* תפריט נייד (המבורגר) */}
@@ -84,6 +89,24 @@ export default function UpperBar() {
                                         {page.name}
                                     </NavLink>
                                 ))}
+                                {/* הוספת קישור אדמין לתפריט המבורגר - מוצג רק למשתמשים עם הרשאת מנהל */}
+                                {(!user || user?.permission === 'admin') && (
+                                    <NavLink
+                                        key={adminPage.name}
+                                        to={adminPage.path}
+                                        onClick={handleCloseNavMenu}
+                                        style={({ isActive }) => ({
+                                            display: 'block',
+                                            padding: '10px 20px',
+                                            color: isActive ? '#e9d0ab' : '#ffffff',
+                                            textDecoration: 'none',
+                                            backgroundColor: '#4a656d',
+                                            borderTop: '1px dashed rgba(233, 208, 171, 0.3)'
+                                        })}
+                                    >
+                                        {adminPage.name}
+                                    </NavLink>
+                                )}
                             </Menu>
                         </Box>
                         {/* שם האפליקציה במרכז */}
@@ -119,7 +142,7 @@ export default function UpperBar() {
                                     style={({ isActive }) => ({
                                         color: '#e9d0ab',
                                         textDecoration: 'none',
-                                        margin: '0 0px',
+                                        margin: '0 1px',
                                         fontSize: '20px',
                                         fontWeight: isActive ? 'bold' : 'normal',
                                         borderBottom: isActive ? '2px solid #e9d0ab' : 'none',
@@ -132,7 +155,26 @@ export default function UpperBar() {
                         </Box>
 
                         {/* אזור המשתמש */}
-                        <Box sx={{ flexGrow: 0 }}>
+                        <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
+                            {/* קישור אדמין בצד שמאל - מוצג רק למשתמשים עם הרשאת מנהל */}
+                            {(!user || user?.permission === 'admin') && (
+                                <NavLink
+                                    key={adminPage.name}
+                                    to={adminPage.path}
+                                    style={({ isActive }) => ({
+                                        color: '#e9d0ab',
+                                        textDecoration: 'none',
+                                        margin: '0 15px',
+                                        fontSize: '20px',
+                                        fontWeight: isActive ? 'bold' : 'normal',
+                                        borderBottom: isActive ? '2px solid #e9d0ab' : 'none',
+                                        padding: '0 5px'
+                                    })}
+                                >
+                                    {adminPage.name}
+                                </NavLink>
+                            )}
+
                             <Tooltip title="הגדרות משתמש">
                                 <IconButton onClick={handleOpenUserMenu} sx={{
                                     p: 0,

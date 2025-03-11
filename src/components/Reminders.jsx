@@ -48,6 +48,7 @@ export default function Reminders() {
         amount: '',
         dueDate: dayjs()
     });
+    const [sortDirection, setSortDirection] = useState('asc'); // 'asc' or 'desc'
 
     // טעינת התזכורות בכל טעינת הדף
     useEffect(() => {
@@ -66,35 +67,48 @@ export default function Reminders() {
 
         switch (dateRange) {
             case 'day':
-                // סינון תזכורות מהיום
+                // סינון תזכורות מהיום בלבד
                 filtered = reminders.filter(r =>
                     dayjs(r.dueDate).format('DD/MM/YYYY') === now.format('DD/MM/YYYY')
                 );
                 break;
+
             case 'week':
-                // סינון תזכורות מהשבוע הקרוב
-                const weekEnd = now.add(7, 'day');
-                filtered = reminders.filter(r =>
-                    dayjs(r.dueDate).isAfter(now.subtract(1, 'day')) &&
-                    dayjs(r.dueDate).isBefore(weekEnd)
-                );
+                // סינון תזכורות מהשבוע הנוכחי
+                const startOfWeek = now.startOf('week');
+                const endOfWeek = now.endOf('week');
+
+                filtered = reminders.filter(r => {
+                    const dueDate = dayjs(r.dueDate);
+                    return (dueDate.isAfter(startOfWeek) || dueDate.isSame(startOfWeek, 'day')) &&
+                        (dueDate.isBefore(endOfWeek) || dueDate.isSame(endOfWeek, 'day'));
+                });
                 break;
+
             case 'month':
-                // סינון תזכורות מהחודש הקרוב
-                const monthEnd = now.add(30, 'day');
-                filtered = reminders.filter(r =>
-                    dayjs(r.dueDate).isAfter(now.subtract(1, 'day')) &&
-                    dayjs(r.dueDate).isBefore(monthEnd)
-                );
+                // סינון תזכורות מהחודש הנוכחי
+                const startOfMonth = now.startOf('month');
+                const endOfMonth = now.endOf('month');
+
+                filtered = reminders.filter(r => {
+                    const dueDate = dayjs(r.dueDate);
+                    return (dueDate.isAfter(startOfMonth) || dueDate.isSame(startOfMonth, 'day')) &&
+                        (dueDate.isBefore(endOfMonth) || dueDate.isSame(endOfMonth, 'day'));
+                });
                 break;
+
             case 'year':
-                // סינון תזכורות מהשנה הקרובה
-                const yearEnd = now.add(365, 'day');
-                filtered = reminders.filter(r =>
-                    dayjs(r.dueDate).isAfter(now.subtract(1, 'day')) &&
-                    dayjs(r.dueDate).isBefore(yearEnd)
-                );
+                // סינון תזכורות מהשנה הנוכחית
+                const startOfYear = now.startOf('year');
+                const endOfYear = now.endOf('year');
+
+                filtered = reminders.filter(r => {
+                    const dueDate = dayjs(r.dueDate);
+                    return (dueDate.isAfter(startOfYear) || dueDate.isSame(startOfYear, 'day')) &&
+                        (dueDate.isBefore(endOfYear) || dueDate.isSame(endOfYear, 'day'));
+                });
                 break;
+
             default:
                 filtered = reminders;
         }
@@ -108,11 +122,11 @@ export default function Reminders() {
             case 'day':
                 return 'היום';
             case 'week':
-                return 'שבוע קרוב';
+                return 'השבוע הנוכחי';
             case 'month':
-                return 'חודש קרוב';
+                return 'החודש הנוכחי';
             case 'year':
-                return 'שנה קרובה';
+                return 'השנה הנוכחית';
             default:
                 return '';
         }
@@ -216,6 +230,48 @@ export default function Reminders() {
 
         return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&dates=${date}/${date}&ctz=Asia/Jerusalem`;
     }
+
+    // פונקציה למיון התזכורות לפי תאריך
+    const toggleSortDirection = () => {
+        setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    };
+
+    // פונקציה חדשה שאוספת את התזכורות בצורה מאורגנת יותר
+    const getGroupedReminders = () => {
+        // ראשית, נמיין את התזכורות לפי תאריך
+        const sortedReminders = [...filteredReminders].sort((a, b) => {
+            const dateA = new Date(a.dueDate);
+            const dateB = new Date(b.dueDate);
+            return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+        });
+
+        // כעת נארגן אותן לפי חודשים
+        const groups = {};
+
+        sortedReminders.forEach(reminder => {
+            const date = new Date(reminder.dueDate);
+            const monthKey = `${date.getMonth()}-${date.getFullYear()}`;
+
+            if (!groups[monthKey]) {
+                // חודש חדש שעדיין לא ראינו
+                const monthNames = [
+                    'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
+                    'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
+                ];
+
+                groups[monthKey] = {
+                    title: `${monthNames[date.getMonth()]} ${date.getFullYear()}`,
+                    reminders: []
+                };
+            }
+
+            groups[monthKey].reminders.push(reminder);
+        });
+
+        return groups;
+    };
+
+    const groupedReminders = getGroupedReminders();
 
     // מסך התזכורות
     return (
@@ -332,7 +388,7 @@ export default function Reminders() {
                     </Button>
                 </Box>
 
-                {/* טבלת התזכורות (מוצגות רק התזכורות שסוננו לפי טווח הזמן) */}
+                {/* טבלת התזכורות עם הפרדה בין חודשים */}
                 <TableContainer
                     component={Paper}
                     sx={{
@@ -343,45 +399,85 @@ export default function Reminders() {
                 >
                     <Table>
                         <TableHead sx={{ position: 'sticky', top: 0, backgroundColor: '#658285', zIndex: 1 }}>
-                            <TableRow >
-                                <TableCell sx={{ color: '#e9d0ab', fontWeight: 'bold' }}>כותרת</TableCell>
-                                <TableCell sx={{ color: '#e9d0ab', fontWeight: 'bold' }}>סכום</TableCell>
-                                <TableCell sx={{ color: '#e9d0ab', fontWeight: 'bold' }}>תאריך</TableCell>
-                                <TableCell sx={{ color: '#e9d0ab', fontWeight: 'bold' }}>פעולות</TableCell>
+                            <TableRow>
+                                <TableCell sx={{ color: '#e9d0ab', fontWeight: 'bold', fontSize: '1rem' }}>כותרת</TableCell>
+                                <TableCell sx={{ color: '#e9d0ab', fontWeight: 'bold', fontSize: '1rem' }}>סכום</TableCell>
+                                <TableCell
+                                    sx={{
+                                        color: '#e9d0ab',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer',
+                                        fontSize: '1rem',
+                                        '&:hover': { opacity: 0.8 }
+                                    }}
+                                    onClick={toggleSortDirection}
+                                >
+                                    תאריך {sortDirection === 'asc' ? '↑' : '↓'}
+                                </TableCell>
+                                <TableCell sx={{ color: '#e9d0ab', fontWeight: 'bold', fontSize: '1rem' }}>פעולות</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody sx={{ backgroundColor: '#e9d0ab' }}>
                             {filteredReminders.length > 0 ? (
-                                filteredReminders.map((reminder) => (
-                                    <TableRow key={reminder._id}>
-                                        <TableCell>{reminder.title}</TableCell>
-                                        <TableCell>₪{Number(reminder.amount).toLocaleString()}</TableCell>
-                                        <TableCell>{new Date(reminder.dueDate).toLocaleDateString('he-IL')}</TableCell>
-                                        <TableCell>
-                                            <IconButton
-                                                size="small"
-                                                onClick={() => handleEdit(reminder)}
-                                                sx={{ mr: 1 }}
-                                            >
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton
-                                                size="small"
-                                                color="error"
-                                                onClick={() => handleDelete(reminder._id)}
-                                                sx={{ mr: 1 }}
-                                            >
-                                                <DeleteIcon />
-                                            </IconButton>
-                                            <IconButton
-                                                size="small"
-                                                color="primary"
-                                                onClick={() => window.open(createGoogleCalendarUrl(reminder), '_blank')}
-                                            >
-                                                <CalendarAddIcon />
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
+                                // רינדור לפי קבוצות חודשים
+                                Object.keys(groupedReminders).map(monthKey => (
+                                    <React.Fragment key={monthKey}>
+                                        {/* כותרת החודש */}
+                                        <TableRow
+                                            sx={{
+                                                backgroundColor: '#658285',
+                                                '& td': {
+                                                    backgroundColor: '#658285',
+                                                    color: '#e9d0ab',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '1.1rem',
+                                                    borderBottom: '2px solid #e9d0ab',
+                                                    py: 1,
+                                                    position: 'sticky',
+                                                    top: 45,
+                                                    zIndex: 1
+                                                }
+                                            }}
+                                        >
+                                            <TableCell colSpan={4} align="center">
+                                                {groupedReminders[monthKey].title}
+                                            </TableCell>
+                                        </TableRow>
+
+                                        {/* רינדור התזכורות של החודש */}
+                                        {groupedReminders[monthKey].reminders.map(reminder => (
+                                            <TableRow key={reminder._id}>
+                                                <TableCell>{reminder.title}</TableCell>
+                                                <TableCell>₪{Number(reminder.amount).toLocaleString()}</TableCell>
+                                                <TableCell>{new Date(reminder.dueDate).toLocaleDateString('he-IL')}</TableCell>
+                                                <TableCell>
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() => handleEdit(reminder)}
+                                                        sx={{ mr: 1 }}
+                                                    >
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                    <IconButton
+                                                        size="small"
+                                                        color="error"
+                                                        onClick={() => handleDelete(reminder._id)}
+                                                        sx={{ mr: 1 }}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                    {/* אם יש כפתור גוגל קלנדר */}
+                                                    <IconButton
+                                                        size="small"
+                                                        color="primary"
+                                                        onClick={() => window.open(createGoogleCalendarUrl(reminder), '_blank')}
+                                                    >
+                                                        <CalendarAddIcon />
+                                                    </IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </React.Fragment>
                                 ))
                             ) : (
                                 <TableRow>

@@ -15,13 +15,18 @@ import {
   Grid,
   Fade,
   Card,
-  Chip
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
 } from "@mui/material";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Delete, CheckCircle, RadioButtonUnchecked, AddTask, Event, Description, Person } from "@mui/icons-material";
-import { getTasks, addTasks, updateTask, deleteTask, getUsers } from '../api/tasksApi';
+import { getTasks, addTasks, updateTask, deleteTask } from '../api/tasksApi';
 import dayjs from 'dayjs';
 import 'dayjs/locale/he';
 
@@ -41,12 +46,11 @@ const TaskBoard = () => {
   const [newTask, setNewTask] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [taskDate, setTaskDate] = useState(dayjs());
-  const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [userData] = useState(JSON.parse(localStorage.getItem('user-data')));
-  const isAdmin = userData?.permission === 'admin';
+  const [taskToDelete, setTaskToDelete] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchTasks();
@@ -55,7 +59,8 @@ const TaskBoard = () => {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const response = await getTasks();
+      // כל משתמש רואה רק את המשימות שלו
+      const response = await getTasks(userData?.id);
       setTasks(response);
     } catch (error) {
       setError("Error fetching tasks: " + error.message);
@@ -78,11 +83,11 @@ const TaskBoard = () => {
 
       const response = await addTasks(taskData);
       if (response.status === 201) {
-        setTasks([...tasks, response.data]);
+        // רענון הרשימה אחרי הוספת משימה
+        await fetchTasks();
         setNewTask("");
         setTaskDescription("");
         setTaskDate(dayjs());
-        setSelectedUser("");
         setError("");
       }
     } catch (error) {
@@ -105,14 +110,28 @@ const TaskBoard = () => {
   };
 
   const handleDelete = async (taskId) => {
+    const taskToRemove = tasks.find(task => task._id === taskId);
+    setTaskToDelete(taskToRemove);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
     try {
-      const response = await deleteTask(taskId);
+      const response = await deleteTask(taskToDelete._id);
       if (response.status === 200) {
-        setTasks(tasks.filter(task => task._id !== taskId));
+        setTasks(tasks.filter(task => task._id !== taskToDelete._id));
+        setDeleteDialogOpen(false);
+        setTaskToDelete(null);
       }
     } catch (error) {
       setError("שגיאה במחיקת משימה: " + error.message);
+      setDeleteDialogOpen(false);
     }
+  };
+
+  const cancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setTaskToDelete(null);
   };
 
   return (
@@ -187,9 +206,8 @@ const TaskBoard = () => {
                   paddingBottom: '10px'
                 }}
               >
-                לוח משימות
+                הוספת משימה חדשה
               </Typography>
-
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <TextField
@@ -306,7 +324,7 @@ const TaskBoard = () => {
                   paddingBottom: '10px'
                 }}
               >
-                רשימת המשימות שלך
+                המשימות שלי
               </Typography>
 
               {/* כותרת וסיכום */}
@@ -511,6 +529,55 @@ const TaskBoard = () => {
           </Box>
         </Paper>
       </Fade>
+
+      {/* חלון אישור מחיקה */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={cancelDelete}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title" sx={{
+          bgcolor: COLORS.primary,
+          color: COLORS.secondary,
+          fontWeight: 'bold',
+          textAlign: 'center'
+        }}>
+          {"אישור מחיקת משימה"}
+        </DialogTitle>
+        <DialogContent sx={{ py: 3, px: 4, mt: 1 }}>
+          <DialogContentText id="alert-dialog-description" sx={{ color: COLORS.primary, textAlign: 'center' }}>
+            האם אתה בטוח שברצונך למחוק את המשימה
+            <Box component="span" sx={{ fontWeight: 'bold', color: COLORS.primary, mx: 1 }}>
+              "{taskToDelete?.title}"?
+            </Box>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'center', gap: 2 }}>
+          <Button
+            onClick={cancelDelete}
+            sx={{
+              color: COLORS.primary,
+              bgcolor: 'rgba(101, 130, 133, 0.08)',
+              px: 3,
+              '&:hover': {
+                bgcolor: 'rgba(101, 130, 133, 0.15)'
+              }
+            }}
+          >
+            ביטול
+          </Button>
+          <Button
+            onClick={confirmDelete}
+            variant="contained"
+            color="error"
+            autoFocus
+            sx={{ px: 3 }}
+          >
+            מחק משימה
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

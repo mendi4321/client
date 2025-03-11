@@ -1,8 +1,13 @@
 // כתובת ה-API של המטלות
 import { BASE_URL } from './constance';
 //  פונקציה לשליפת כל המטלות
-export async function getTasks() {
-    const response = await fetch(BASE_URL + 'tasks', {
+export async function getTasks(userId = null) {
+    let url = BASE_URL + 'tasks';
+    if (userId) {
+        url += `?userId=${userId}`;
+    }
+
+    const response = await fetch(url, {
         method: "GET",
         headers: {
             'Content-Type': 'application/json',

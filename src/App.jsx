@@ -11,6 +11,8 @@ import { useContext } from 'react';
 import { UserContext } from './components/UserContext';
 import Bank from './components/Bank'
 import Tasks from './components/Tasks';
+import Admin from './components/Admin';
+
 // קומפוננטת ProtectedRoute שתבדוק אם המשתמש מחובר
 const ProtectedRoute = ({ children }) => {//מגן על הדף מכך שהמשתמש לא יכול להגיע לדף זה אם לא מחובר
   const { user } = useContext(UserContext);//מציאת המשתמש מהקונסטקט
@@ -55,7 +57,12 @@ function App() {
           } />
           <Route path='/tasks' element={
             <ProtectedRoute>
-              <Tasks/>
+              <Tasks />
+            </ProtectedRoute>
+          } />
+          <Route path='/admin' element={
+            <ProtectedRoute>
+              <Admin />
             </ProtectedRoute>
           } />
 

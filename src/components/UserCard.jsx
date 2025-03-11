@@ -3,6 +3,7 @@ import { UserContext } from './UserContext';
 import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LogoutIcon from '@mui/icons-material/Logout';
+
 //כרטיס המשתמש
 export default function UserCard(props) {
     const { user, unlogUser } = useContext(UserContext);
@@ -17,6 +18,7 @@ export default function UserCard(props) {
             props.onClose();
         }
     }
+
     //הצגת הכרטיס
     return (
         <Box sx={{

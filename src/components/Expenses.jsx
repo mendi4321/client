@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Box,
     Paper,
@@ -55,6 +55,7 @@ export default function Expenses() {
     const [selectedCurrency, setSelectedCurrency] = useState('ILS');
     const [convertedAmounts, setConvertedAmounts] = useState({});
     const [convertedTotal, setConvertedTotal] = useState(0);
+    const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
 
     // העברנו את הפונקציה למעלה
     const getCurrencySymbol = (currencyCode) => {
@@ -131,32 +132,48 @@ export default function Expenses() {
 
         switch (dateRange) {
             case 'day':
-                // סינון עסקאות מהיום
+                // סינון עסקאות מהיום בלבד
                 filtered = transactions.filter(t =>
                     dayjs(t.date).format('DD/MM/YYYY') === now.format('DD/MM/YYYY')
                 );
                 break;
+
             case 'week':
-                // סינון עסקאות מהשבוע האחרון
-                const weekStart = now.subtract(7, 'day');
-                filtered = transactions.filter(t =>
-                    dayjs(t.date).isAfter(weekStart) || dayjs(t.date).isSame(weekStart, 'day')
-                );
+                // סינון עסקאות מהשבוע הנוכחי
+                const startOfWeek = now.startOf('week');
+                const endOfWeek = now.endOf('week');
+
+                filtered = transactions.filter(t => {
+                    const txDate = dayjs(t.date);
+                    return (txDate.isAfter(startOfWeek) || txDate.isSame(startOfWeek, 'day')) &&
+                        (txDate.isBefore(endOfWeek) || txDate.isSame(endOfWeek, 'day'));
+                });
                 break;
+
             case 'month':
-                // סינון עסקאות מהחודש האחרון
-                const monthStart = now.subtract(30, 'day');
-                filtered = transactions.filter(t =>
-                    dayjs(t.date).isAfter(monthStart) || dayjs(t.date).isSame(monthStart, 'day')
-                );
+                // סינון עסקאות מהחודש הנוכחי
+                const startOfMonth = now.startOf('month');
+                const endOfMonth = now.endOf('month');
+
+                filtered = transactions.filter(t => {
+                    const txDate = dayjs(t.date);
+                    return (txDate.isAfter(startOfMonth) || txDate.isSame(startOfMonth, 'day')) &&
+                        (txDate.isBefore(endOfMonth) || txDate.isSame(endOfMonth, 'day'));
+                });
                 break;
+
             case 'year':
-                // סינון עסקאות מהשנה האחרונה
-                const yearStart = now.subtract(365, 'day');
-                filtered = transactions.filter(t =>
-                    dayjs(t.date).isAfter(yearStart) || dayjs(t.date).isSame(yearStart, 'day')
-                );
+                // סינון עסקאות מהשנה הנוכחית
+                const startOfYear = now.startOf('year');
+                const endOfYear = now.endOf('year');
+
+                filtered = transactions.filter(t => {
+                    const txDate = dayjs(t.date);
+                    return (txDate.isAfter(startOfYear) || txDate.isSame(startOfYear, 'day')) &&
+                        (txDate.isBefore(endOfYear) || txDate.isSame(endOfYear, 'day'));
+                });
                 break;
+
             default:
                 filtered = transactions;
                 break;
@@ -220,15 +237,48 @@ export default function Expenses() {
             case 'day':
                 return 'היום';
             case 'week':
-                return 'שבוע אחרון';
+                return 'השבוע הנוכחי';
             case 'month':
-                return 'חודש אחרון';
+                return 'החודש הנוכחי';
             case 'year':
-                return 'שנה אחרונה';
+                return 'השנה הנוכחית';
             default:
                 return '';
         }
     }
+
+    // מיון העסקאות לפי המצב הנוכחי
+    const sortedTransactions = useMemo(() => {
+        const transactionsToSort = [...filteredTransactions];
+
+        if (sortConfig.key) {
+            transactionsToSort.sort((a, b) => {
+                if (sortConfig.key === 'date') {
+                    const dateA = new Date(a.date);
+                    const dateB = new Date(b.date);
+                    return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
+                }
+                return 0;
+            });
+        }
+
+        return transactionsToSort;
+    }, [filteredTransactions, sortConfig]);
+
+    // פונקציה לטיפול בבקשות מיון כשלוחצים על כותרת העמודה
+    const requestSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    // סימן ויזואלי למצב המיון הנוכחי
+    const getSortSymbol = (column) => {
+        if (sortConfig.key !== column) return '';
+        return sortConfig.direction === 'asc' ? ' ↑' : ' ↓';
+    };
 
     // מסך ההוצאות
     return (
@@ -321,147 +371,134 @@ export default function Expenses() {
                 </ToggleButtonGroup>
             </Box>
 
-            {/* טבלת ההוצאות */}
+            {/* טבלת ההוצאות - עם הפרדה לפי חודשים ומיון אינטראקטיבי */}
             <TableContainer component={Paper}
                 sx={{
-                    width: '75%',
-                    bgcolor: '#658285',
+                    backgroundColor: '#658285',
                     height: '50vh',
-                    mb: 4,
-                    borderRadius: '8px',
-                    boxShadow: '0 3px 5px rgba(0,0,0,0.2)',
-                    overflow: 'auto'
+                    width: '75%',
+                    margin: '20px auto'
                 }}>
-                <Table stickyHeader>
-                    <TableHead>
+                <Table>
+                    <TableHead sx={{ position: 'sticky', top: 0, backgroundColor: '#658285', zIndex: 1 }}>
                         <TableRow>
                             <TableCell
                                 sx={{
-                                    backgroundColor: '#658285',
                                     color: '#e9d0ab',
-                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
                                     fontSize: '1rem',
-                                    textAlign: 'center',
-                                    borderBottom: '2px solid #e9d0ab'
+                                    '&:hover': { opacity: 0.8 },
+                                    fontWeight: sortConfig.key === 'date' ? 'bold' : 'normal'
                                 }}
+                                onClick={() => requestSort('date')}
                             >
-                                תאריך
+                                תאריך {getSortSymbol('date')}
                             </TableCell>
-                            <TableCell
-                                sx={{
-                                    backgroundColor: '#658285',
-                                    color: '#e9d0ab',
-                                    fontWeight: 'bold',
-                                    fontSize: '1rem',
-                                    textAlign: 'center',
-                                    borderBottom: '2px solid #e9d0ab'
-                                }}
-                            >
-                                תיאור
-                            </TableCell>
-                            <TableCell
-                                sx={{
-                                    backgroundColor: '#658285',
-                                    color: '#e9d0ab',
-                                    fontWeight: 'bold',
-                                    fontSize: '1rem',
-                                    textAlign: 'center',
-                                    borderBottom: '2px solid #e9d0ab'
-                                }}
-                            >
-                                סכום
-                            </TableCell>
-                            <TableCell
-                                sx={{
-                                    backgroundColor: '#658285',
-                                    color: '#e9d0ab',
-                                    fontWeight: 'bold',
-                                    fontSize: '1rem',
-                                    textAlign: 'center',
-                                    borderBottom: '2px solid #e9d0ab'
-                                }}
-                            >
-                                קטגוריה
-                            </TableCell>
-                            <TableCell
-                                sx={{
-                                    backgroundColor: '#658285',
-                                    color: '#e9d0ab',
-                                    fontWeight: 'bold',
-                                    fontSize: '1rem',
-                                    textAlign: 'center',
-                                    borderBottom: '2px solid #e9d0ab'
-                                }}
-                            >
-                                פעולות
-                            </TableCell>
+                            <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>תיאור</TableCell>
+                            <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>קטגוריה</TableCell>
+                            <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>סכום</TableCell>
+                            <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>פעולות</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody sx={{ backgroundColor: '#e9d0ab' }}>
                         {filteredTransactions.length > 0 ? (
-                            filteredTransactions.map((transaction) => (
-                                <TableRow
-                                    key={transaction._id}
-                                    sx={{
-                                        backgroundColor: '#e9d0ab',
-                                        '&:hover': { backgroundColor: '#d9c09b' },
-                                        transition: 'background-color 0.2s'
-                                    }}
-                                >
-                                    <TableCell sx={{ textAlign: 'center' }}>
-                                        {new Date(transaction.date).toLocaleDateString()}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: 'center' }}>
-                                        {transaction.description}
-                                    </TableCell>
-                                    <TableCell sx={{
-                                        textAlign: 'center',
-                                        color: '#f44336',
-                                        fontWeight: 'bold'
-                                    }}>
-                                        {getCurrencySymbol(selectedCurrency)}
-                                        {(selectedCurrency === 'ILS'
-                                            ? Number(transaction.amount)
-                                            : convertedAmounts[transaction._id] || Number(transaction.amount)
-                                        ).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: 'center' }}>
-                                        <Stack direction="row" alignItems="center" spacing={1} justifyContent="center">
-                                            <CategoryIcon sx={{ color: '#658285', fontSize: 20 }} />
-                                            {transaction.category || 'לא מוגדר'}
-                                        </Stack>
-                                    </TableCell>
-                                    <TableCell sx={{ textAlign: 'center' }}>
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => setEditTransaction(transaction)}
-                                            sx={{
-                                                mr: 1,
-                                                color: '#658285',
-                                                '&:hover': { color: '#4a656d' }
-                                            }}
-                                        >
-                                            <EditIcon />
-                                        </IconButton>
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => handleDeleteClick(transaction._id)}
-                                            sx={{
-                                                color: '#f44336',
-                                                '&:hover': { color: '#d32f2f' }
-                                            }}
-                                        >
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))
+                            (() => {
+                                // שימוש בעסקאות ממויינות
+                                const sorted = sortedTransactions;
+
+                                // רינדור עם כותרות חודשים
+                                const rows = [];
+                                let lastMonth = null;
+
+                                sorted.forEach(transaction => {
+                                    const date = new Date(transaction.date);
+                                    const month = date.getMonth();
+                                    const year = date.getFullYear();
+                                    const currentMonth = `${month}-${year}`;
+
+                                    // הוספת כותרת חודש אם זהו חודש חדש
+                                    if (currentMonth !== lastMonth) {
+                                        const monthNames = [
+                                            'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
+                                            'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
+                                        ];
+
+                                        lastMonth = currentMonth;
+                                        rows.push(
+                                            <TableRow
+                                                key={`month-${currentMonth}`}
+                                                sx={{
+                                                    backgroundColor: '#658285',
+                                                    '& td': {
+                                                        color: '#e9d0ab',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '1.1rem',
+                                                        borderBottom: '2px solid #e9d0ab',
+                                                        py: 1
+                                                    }
+                                                }}
+                                            >
+                                                <TableCell sx={{
+                                                    position: 'sticky',
+                                                    top: 45,
+                                                    backgroundColor: '#658285',
+                                                    zIndex: 1,
+                                                    '& td': {
+                                                        backgroundColor: '#658285',
+                                                        color: '#e9d0ab',
+                                                        fontWeight: 'bold',
+                                                    }
+                                                }} colSpan={5} align="center">
+                                                    {`${monthNames[month]} ${year}`}
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    }
+
+                                    // הוספת שורת עסקה
+                                    rows.push(
+                                        <TableRow key={transaction._id}>
+                                            <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
+                                            <TableCell>{transaction.description}</TableCell>
+                                            <TableCell>{transaction.category || '-'}</TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    color: 'red',
+                                                    fontWeight: 'bold'
+                                                }}
+                                            >
+                                                {getCurrencySymbol(selectedCurrency)}
+                                                {(selectedCurrency === 'ILS'
+                                                    ? Number(transaction.amount)
+                                                    : convertedAmounts[transaction._id] || Number(transaction.amount)
+                                                ).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                            </TableCell>
+                                            <TableCell>
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => setEditTransaction(transaction)}
+                                                    sx={{ mr: 1 }}
+                                                >
+                                                    <EditIcon />
+                                                </IconButton>
+                                                <IconButton
+                                                    size="small"
+                                                    color="error"
+                                                    onClick={() => handleDeleteClick(transaction._id)}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                });
+
+                                return rows;
+                            })()
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
-                                    <Typography variant="subtitle1">
-                                        אין הוצאות להצגה בטווח הזמן שנבחר
-                                    </Typography>
+                                <TableCell colSpan={5} sx={{ textAlign: 'center' }}>
+                                    אין הוצאות בטווח הזמן שנבחר
                                 </TableCell>
                             </TableRow>
                         )}
@@ -591,7 +628,13 @@ export default function Expenses() {
                     flexDirection: 'column',
                     alignItems: 'center',
                 }}>
-                    <ExpensesChart />
+                    <ExpensesChart
+                        filteredTransactions={filteredTransactions}
+                        dateRange={dateRange}
+                        selectedCurrency={selectedCurrency}
+                        getCurrencySymbol={getCurrencySymbol}
+                        convertedAmounts={convertedAmounts}
+                    />
                 </Box>
             </Box>
 

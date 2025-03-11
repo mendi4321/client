@@ -36,13 +36,14 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import StarIcon from '@mui/icons-material/Star';
 import MapIcon from '@mui/icons-material/Map';
-import AddIcon from '@mui/icons-material/Add';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import { styled } from '@mui/material/styles';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import rtlPlugin from 'stylis-plugin-rtl';
 import { prefixer } from 'stylis';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
+import { convertCurrency } from '../api/currencyApi';
 
 // יצירת מטמון עבור RTL
 const cacheRtl = createCache({
@@ -243,15 +244,6 @@ const bankComparisonData = [
         score: 3.7
     }
 ];
-
-// שערי מטבע לדוגמה
-const exchangeRates = [
-    { name: 'דולר ארה"ב', code: 'USD', rate: 3.67, change: '+0.2%' },
-    { name: 'אירו', code: 'EUR', rate: 3.94, change: '-0.1%' },
-    { name: 'ליש"ט', code: 'GBP', rate: 4.62, change: '+0.15%' },
-    { name: 'דולר קנדי', code: 'CAD', rate: 2.70, change: '-0.05%' },
-];
-
 function Bank() {
     const [branchData, setBranchData] = useState([]);
     const [filteredBranchData, setFilteredBranchData] = useState([]);
@@ -267,6 +259,55 @@ function Bank() {
     const [tabValue, setTabValue] = useState(0);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+    // משתנים להמרת מטבע
+    const [amountToConvert, setAmountToConvert] = useState('');
+    const [fromCurrency, setFromCurrency] = useState('ILS');
+    const [toCurrency, setToCurrency] = useState('USD');
+    const [convertedAmount, setConvertedAmount] = useState(null);
+    const [conversionLoading, setConversionLoading] = useState(false);
+    const [conversionError, setConversionError] = useState('');
+
+    // רשימת מטבעות פופולריים
+    const currencies = [
+        { code: 'ILS', name: 'שקל ישראלי' },
+        { code: 'USD', name: 'דולר אמריקאי' },
+        { code: 'EUR', name: 'אירו' },
+        { code: 'GBP', name: 'לירה שטרלינג' },
+        { code: 'CAD', name: 'דולר קנדי' },
+        { code: 'JPY', name: 'יין יפני' },
+        { code: 'AUD', name: 'דולר אוסטרלי' },
+        { code: 'CHF', name: 'פרנק שוויצרי' },
+    ];
+
+    // פונקציה להמרת מטבע
+    const handleCurrencyConversion = async () => {
+        if (!amountToConvert || isNaN(amountToConvert) || amountToConvert <= 0) {
+            setConversionError('נא להזין סכום תקין להמרה');
+            return;
+        }
+
+        setConversionLoading(true);
+        setConversionError('');
+
+        try {
+            const result = await convertCurrency(parseFloat(amountToConvert), fromCurrency, toCurrency);
+            setConvertedAmount(result);
+        } catch (error) {
+            console.error('שגיאה בהמרת מטבע:', error);
+            setConversionError('אירעה שגיאה בהמרת המטבע. אנא נסו שוב מאוחר יותר.');
+        } finally {
+            setConversionLoading(false);
+        }
+    };
+
+    // החלפת המטבעות (מקור ויעד)
+    const handleSwapCurrencies = () => {
+        setFromCurrency(toCurrency);
+        setToCurrency(fromCurrency);
+        // איפוס התוצאה הקודמת
+        setConvertedAmount(null);
+    };
 
     // פונקציה לטעינת נתוני הסניפים
     const fetchAllBranchData = async () => {
@@ -357,49 +398,115 @@ function Bank() {
                         <div role="tabpanel" hidden={tabValue !== 0}>
                             {tabValue === 0 && (
                                 <>
-                                    {/* שערי מטבע */}
+                                    {/* המרת מטבע */}
                                     <Box sx={{ mb: 5 }}>
                                         <SectionTitle variant="h5" component="h2">
-                                            שערי מטבע עדכניים
+                                            המרת מטבע
                                         </SectionTitle>
-                                        <Grid container spacing={2}>
-                                            {exchangeRates.map((currency, index) => (
-                                                <Grid item xs={6} sm={3} key={index}>
-                                                    <StyledCard sx={{ backgroundColor: '#e9d0ab' }}>
-                                                        <CardHeader
-                                                            avatar={
-                                                                <Avatar sx={{ bgcolor: 'primary.light', color: '#e9d0ab', backgroundColor: '#658285' }}>
-                                                                    {currency.code.substring(0, 1)}
-                                                                </Avatar>
-                                                            }
-                                                            title={currency.name}
-                                                            subheader={currency.code}
-                                                        />
-                                                        <CardContent>
-                                                            <Typography variant="h5" component="div" gutterBottom>
-                                                                ₪{currency.rate.toFixed(2)}
-                                                            </Typography>
-                                                            <Chip
-                                                                label={currency.change}
-                                                                size="small"
-                                                                color={currency.change.startsWith('+') ? "success" : "error"}
-                                                            />
-                                                        </CardContent>
-                                                    </StyledCard>
+                                        <Paper sx={{ p: 3, borderRadius: '12px', backgroundColor: '#e9d0ab' }}>
+                                            <Grid container spacing={3}>
+                                                <Grid item xs={12} md={4}>
+                                                    <TextField
+                                                        fullWidth
+                                                        label="סכום להמרה"
+                                                        variant="outlined"
+                                                        type="number"
+                                                        value={amountToConvert}
+                                                        onChange={(e) => setAmountToConvert(e.target.value)}
+                                                        error={!!conversionError}
+                                                        helperText={conversionError}
+                                                    />
                                                 </Grid>
-                                            ))}
-                                        </Grid>
-                                    </Box>
+                                                <Grid item xs={5} md={3}>
+                                                    <FormControl fullWidth variant="outlined">
+                                                        <InputLabel>ממטבע</InputLabel>
+                                                        <Select
+                                                            value={fromCurrency}
+                                                            onChange={(e) => setFromCurrency(e.target.value)}
+                                                            label="ממטבע"
+                                                            MenuProps={{
+                                                                PaperProps: {
+                                                                    style: {
+                                                                        backgroundColor: '#fff9eb',
+                                                                    },
+                                                                },
+                                                            }}
+                                                        >
+                                                            {currencies.map((currency) => (
+                                                                <MenuItem key={currency.code} value={currency.code}>
+                                                                    {currency.code} - {currency.name}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={2} md={1} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <Button
+                                                        onClick={handleSwapCurrencies}
+                                                        sx={{ minWidth: 'auto', backgroundColor: '#658285', color: '#fff9eb' }}
+                                                    >
+                                                        <CompareArrowsIcon />
+                                                    </Button>
+                                                </Grid>
+                                                <Grid item xs={5} md={3}>
+                                                    <FormControl fullWidth variant="outlined">
+                                                        <InputLabel>למטבע</InputLabel>
+                                                        <Select
+                                                            value={toCurrency}
+                                                            onChange={(e) => setToCurrency(e.target.value)}
+                                                            label="למטבע"
+                                                            MenuProps={{
+                                                                PaperProps: {
+                                                                    style: {
+                                                                        backgroundColor: '#fff9eb',
+                                                                    },
+                                                                },
+                                                            }}
+                                                        >
+                                                            {currencies.map((currency) => (
+                                                                <MenuItem key={currency.code} value={currency.code}>
+                                                                    {currency.code} - {currency.name}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </Select>
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item xs={12} md={1} sx={{ display: 'flex', alignItems: 'center' }}>
+                                                    <Button
+                                                        variant="contained"
+                                                        onClick={handleCurrencyConversion}
+                                                        fullWidth
+                                                        disabled={conversionLoading}
+                                                        sx={{ height: '100%', backgroundColor: '#658285', color: '#fff9eb' }}
+                                                    >
+                                                        המר
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
 
+                                            {conversionLoading && (
+                                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                                                    <CircularProgress size={30} />
+                                                </Box>
+                                            )}
+
+                                            {convertedAmount !== null && !conversionLoading && (
+                                                <Box sx={{ mt: 3, p: 2, backgroundColor: '#fff9eb', borderRadius: '8px', textAlign: 'center' }}>
+                                                    <Typography variant="h6" component="div" gutterBottom>
+                                                        תוצאת ההמרה
+                                                    </Typography>
+                                                    <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: '#658285' }}>
+                                                        {convertedAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })} {toCurrency}
+                                                    </Typography>
+                                                </Box>
+                                            )}
+                                        </Paper>
+                                    </Box>
                                     {/* השוואת בנקים */}
                                     <Box sx={{ mb: 5 }}>
                                         <SectionTitle variant="h5" component="h2">
                                             השוואה מקיפה בין בנקים בישראל
                                         </SectionTitle>
-                                        <Typography variant="body2" sx={{ mb: 3 }}>
-                                            טבלה זו מציגה השוואה מקיפה בין הבנקים המובילים בישראל. הנתונים מתעדכנים מדי חודש.
-                                        </Typography>
-
                                         <TableContainer component={Paper}
                                             sx={{
                                                 mb: 4, overflow: 'auto',
@@ -411,16 +518,16 @@ function Bank() {
                                             <Table aria-label="טבלת השוואת בנקים מפורטת">
                                                 <TableHead>
                                                     <TableRow sx={{ backgroundColor: '#658285' }}>
-                                                        <TableCell sx={{ color: '#e9d0ab' }}>בנק</TableCell>
-                                                        <TableCell sx={{ color: '#e9d0ab' }}>חשבון עו"ש</TableCell>
-                                                        <TableCell sx={{ color: '#e9d0ab' }}>חסכונות</TableCell>
-                                                        <TableCell sx={{ color: '#e9d0ab' }}>משכנתאות</TableCell>
-                                                        <TableCell sx={{ color: '#e9d0ab' }}>הלוואות</TableCell>
-                                                        <TableCell sx={{ color: '#e9d0ab' }}>כרטיסי אשראי</TableCell>
-                                                        <TableCell sx={{ color: '#e9d0ab' }}>שירותים דיגיטליים</TableCell>
-                                                        <TableCell sx={{ color: '#e9d0ab' }}>שירות לקוחות</TableCell>
-                                                        <TableCell sx={{ color: '#e9d0ab' }}>דירוג כללי</TableCell>
-                                                        <TableCell sx={{ color: '#e9d0ab' }}>ציון כללי</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>בנק</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>חשבון עו"ש</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>חסכונות</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>משכנתאות</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>הלוואות</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>כרטיסי אשראי</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>שירותים דיגיטליים</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>שירות לקוחות</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>דירוג כללי</TableCell>
+                                                        <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>ציון כללי</TableCell>
                                                     </TableRow>
                                                 </TableHead>
                                                 <TableBody>
