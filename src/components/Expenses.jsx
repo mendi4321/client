@@ -39,6 +39,15 @@ import { PieChart } from '@mui/x-charts/PieChart';
 import dayjs from 'dayjs';
 import ExpensesChart from './ExpensesChart';
 import { convertCurrency } from '../api/currencyApi';
+import rtlPlugin from 'stylis-plugin-rtl';
+import { prefixer } from 'stylis';
+import { CacheProvider } from '@emotion/react';
+import createCache from '@emotion/cache';
+
+const cacheRtl = createCache({
+    key: 'muirtl',
+    stylisPlugins: [prefixer, rtlPlugin],
+});
 
 // מסך ההוצאות  
 export default function Expenses() {
@@ -282,412 +291,414 @@ export default function Expenses() {
 
     // מסך ההוצאות
     return (
-        <Box sx={{
-            p: 3,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-
-        }}>
-            {error && (
-                <Typography color="error" sx={{ mb: 2 }}>
-                    {error}
-                </Typography>
-            )}
-            {/* בחירת מטבע */}
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
-                <FormControl sx={{ minWidth: 120 }}>
-                    <InputLabel>מטבע</InputLabel>
-                    <Select
-                        value={selectedCurrency}
-                        onChange={(e) => setSelectedCurrency(e.target.value)}
-                        label="מטבע"
-                    >
-                        {currencies.map((currency) => (
-                            <MenuItem key={currency.value} value={currency.value}>
-                                {currency.label}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            </Box>
-
-            {/* כותרת ההוצאות */}
-            <Paper sx={{
-                p: 2, mb: 4,
-                bgcolor: '#ffebee',
-                textAlign: 'center',
-                borderRadius: '10px',
-                width: '50%',
+        <CacheProvider value={cacheRtl}>
+            <Box sx={{
+                p: 3,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
             }}>
-                <Typography variant="h6">סך הוצאות ({dateRangeToDisplay()})</Typography>
-                <Typography variant="h4" sx={{ my: 2 }}>
-                    {getCurrencySymbol(selectedCurrency)}
-                    {convertedTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                </Typography>
-                <Button
-                    variant="contained"
-                    startIcon={<RemoveIcon />}
-                    onClick={() => setShowAddDialog(true)}
-                    sx={{
-                        backgroundColor: '#f44336',
-                        '&:hover': { backgroundColor: '#d32f2f' }
-                    }}
-                >
-                    הוסף הוצאה
-                </Button>
-            </Paper>
+                {error && (
+                    <Typography color="error" sx={{ mb: 2 }}>
+                        {error}
+                    </Typography>
+                )}
+                {/* בחירת מטבע */}
+                <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+                    <FormControl sx={{ minWidth: 120 }}>
+                        <InputLabel>מטבע</InputLabel>
+                        <Select
+                            value={selectedCurrency}
+                            onChange={(e) => setSelectedCurrency(e.target.value)}
+                            label="מטבע"
+                        >
+                            {currencies.map((currency) => (
+                                <MenuItem key={currency.value} value={currency.value}>
+                                    {currency.label}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Box>
 
-            {/* טווח זמן לסינון */}
-            <Box sx={{ color: '#658285', p: 2, mb: 3, textAlign: 'center' }}>
-                <Typography variant="h6" gutterBottom>
-                    בחר טווח זמן להצגת נתונים
-                </Typography>
-                <ToggleButtonGroup
-                    value={dateRange}
-                    exclusive
-                    onChange={(e, newValue) => {
-                        if (newValue) setDateRange(newValue);
-                    }}
-                    aria-label="טווח זמן"
-                    sx={{ mt: 1 }}
-                >
-                    <ToggleButton value="day" aria-label="יום">
-                        <CalendarViewDayIcon sx={{ mr: 1, color: '#e9d0ab' }} />
-                        יום
-                    </ToggleButton>
-                    <ToggleButton value="week" aria-label="שבוע">
-                        <ViewWeekIcon sx={{ mr: 1, color: '#e9d0ab' }} />
-                        שבוע
-                    </ToggleButton>
-                    <ToggleButton value="month" aria-label="חודש">
-                        <DateRangeIcon sx={{ mr: 1, color: '#e9d0ab' }} />
-                        חודש
-                    </ToggleButton>
-                    <ToggleButton value="year" aria-label="שנה">
-                        <CalendarMonthIcon sx={{ mr: 1, color: '#e9d0ab' }} />
-                        שנה
-                    </ToggleButton>
-                </ToggleButtonGroup>
-            </Box>
-
-            {/* טבלת ההוצאות - עם הפרדה לפי חודשים ומיון אינטראקטיבי */}
-            <TableContainer component={Paper}
-                sx={{
-                    backgroundColor: '#658285',
-                    height: '50vh',
-                    width: '75%',
-                    margin: '20px auto'
+                {/* כותרת ההוצאות */}
+                <Paper sx={{
+                    p: 2, mb: 4,
+                    bgcolor: '#ffebee',
+                    textAlign: 'center',
+                    borderRadius: '10px',
+                    width: '50%',
                 }}>
-                <Table>
-                    <TableHead sx={{ position: 'sticky', top: 0, backgroundColor: '#658285', zIndex: 1 }}>
-                        <TableRow>
-                            <TableCell
-                                sx={{
-                                    color: '#e9d0ab',
-                                    cursor: 'pointer',
-                                    fontSize: '1rem',
-                                    '&:hover': { opacity: 0.8 },
-                                    fontWeight: sortConfig.key === 'date' ? 'bold' : 'normal'
-                                }}
-                                onClick={() => requestSort('date')}
-                            >
-                                תאריך {getSortSymbol('date')}
-                            </TableCell>
-                            <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>תיאור</TableCell>
-                            <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>קטגוריה</TableCell>
-                            <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>סכום</TableCell>
-                            <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>פעולות</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody sx={{ backgroundColor: '#e9d0ab' }}>
-                        {filteredTransactions.length > 0 ? (
-                            (() => {
-                                // שימוש בעסקאות ממויינות
-                                const sorted = sortedTransactions;
+                    <Typography variant="h6">סך הוצאות ({dateRangeToDisplay()})</Typography>
+                    <Typography variant="h4" sx={{ my: 2 }}>
+                        {getCurrencySymbol(selectedCurrency)}
+                        {convertedTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        startIcon={<RemoveIcon />}
+                        onClick={() => setShowAddDialog(true)}
+                        sx={{
+                            backgroundColor: '#f44336',
+                            '&:hover': { backgroundColor: '#d32f2f' }
+                        }}
+                    >
+                        הוסף הוצאה
+                    </Button>
+                </Paper>
 
-                                // רינדור עם כותרות חודשים
-                                const rows = [];
-                                let lastMonth = null;
+                {/* טווח זמן לסינון */}
+                <Box sx={{ color: '#658285', p: 2, mb: 3, textAlign: 'center' }}>
+                    <Typography variant="h6" gutterBottom>
+                        בחר טווח זמן להצגת נתונים
+                    </Typography>
+                    <ToggleButtonGroup
+                        value={dateRange}
+                        exclusive
+                        onChange={(e, newValue) => {
+                            if (newValue) setDateRange(newValue);
+                        }}
+                        aria-label="טווח זמן"
+                        sx={{ mt: 1 }}
+                    >
+                        <ToggleButton value="day" aria-label="יום">
+                            <CalendarViewDayIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                            יום
+                        </ToggleButton>
+                        <ToggleButton value="week" aria-label="שבוע">
+                            <ViewWeekIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                            שבוע
+                        </ToggleButton>
+                        <ToggleButton value="month" aria-label="חודש">
+                            <DateRangeIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                            חודש
+                        </ToggleButton>
+                        <ToggleButton value="year" aria-label="שנה">
+                            <CalendarMonthIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                            שנה
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </Box>
 
-                                sorted.forEach(transaction => {
-                                    const date = new Date(transaction.date);
-                                    const month = date.getMonth();
-                                    const year = date.getFullYear();
-                                    const currentMonth = `${month}-${year}`;
+                {/* טבלת ההוצאות - עם הפרדה לפי חודשים ומיון אינטראקטיבי */}
+                <TableContainer component={Paper}
+                    sx={{
+                        backgroundColor: '#658285',
+                        height: '50vh',
+                        width: '75%',
+                        margin: '20px auto'
+                    }}>
+                    <Table>
+                        <TableHead sx={{ position: 'sticky', top: 0, backgroundColor: '#658285', zIndex: 1 }}>
+                            <TableRow>
+                                <TableCell
+                                    sx={{
+                                        color: '#e9d0ab',
+                                        cursor: 'pointer',
+                                        fontSize: '1rem',
+                                        '&:hover': { opacity: 0.8 },
+                                        fontWeight: sortConfig.key === 'date' ? 'bold' : 'normal',
+                                        width: '175px'
+                                    }}
+                                    onClick={() => requestSort('date')}
+                                >
+                                    תאריך {getSortSymbol('date')}
+                                </TableCell>
+                                <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>תיאור</TableCell>
+                                <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>קטגוריה</TableCell>
+                                <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>סכום</TableCell>
+                                <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem', width: '100px' }}>פעולות</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody sx={{ backgroundColor: '#e9d0ab' }}>
+                            {filteredTransactions.length > 0 ? (
+                                (() => {
+                                    // שימוש בעסקאות ממויינות
+                                    const sorted = sortedTransactions;
 
-                                    // הוספת כותרת חודש אם זהו חודש חדש
-                                    if (currentMonth !== lastMonth) {
-                                        const monthNames = [
-                                            'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
-                                            'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
-                                        ];
+                                    // רינדור עם כותרות חודשים
+                                    const rows = [];
+                                    let lastMonth = null;
 
-                                        lastMonth = currentMonth;
-                                        rows.push(
-                                            <TableRow
-                                                key={`month-${currentMonth}`}
-                                                sx={{
-                                                    backgroundColor: '#658285',
-                                                    '& td': {
-                                                        color: '#e9d0ab',
-                                                        fontWeight: 'bold',
-                                                        fontSize: '1.1rem',
-                                                        borderBottom: '2px solid #e9d0ab',
-                                                        py: 1
-                                                    }
-                                                }}
-                                            >
-                                                <TableCell sx={{
-                                                    position: 'sticky',
-                                                    top: 45,
-                                                    backgroundColor: '#658285',
-                                                    zIndex: 1,
-                                                    '& td': {
+                                    sorted.forEach(transaction => {
+                                        const date = new Date(transaction.date);
+                                        const month = date.getMonth();
+                                        const year = date.getFullYear();
+                                        const currentMonth = `${month}-${year}`;
+
+                                        // הוספת כותרת חודש אם זהו חודש חדש
+                                        if (currentMonth !== lastMonth) {
+                                            const monthNames = [
+                                                'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
+                                                'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
+                                            ];
+
+                                            lastMonth = currentMonth;
+                                            rows.push(
+                                                <TableRow
+                                                    key={`month-${currentMonth}`}
+                                                    sx={{
                                                         backgroundColor: '#658285',
-                                                        color: '#e9d0ab',
-                                                        fontWeight: 'bold',
-                                                    }
-                                                }} colSpan={5} align="center">
-                                                    {`${monthNames[month]} ${year}`}
+                                                        '& td': {
+                                                            color: '#e9d0ab',
+                                                            fontWeight: 'bold',
+                                                            fontSize: '1.1rem',
+                                                            borderBottom: '2px solid #e9d0ab',
+                                                            py: 1
+                                                        }
+                                                    }}
+                                                >
+                                                    <TableCell sx={{
+                                                        position: 'sticky',
+                                                        top: 45,
+                                                        backgroundColor: '#658285',
+                                                        zIndex: 1,
+                                                        '& td': {
+                                                            backgroundColor: '#658285',
+                                                            color: '#e9d0ab',
+                                                            fontWeight: 'bold',
+                                                        }
+                                                    }} colSpan={5} align="center">
+                                                        {`${monthNames[month]} ${year}`}
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        }
+
+                                        // הוספת שורת עסקה
+                                        rows.push(
+                                            <TableRow key={transaction._id}>
+                                                <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
+                                                <TableCell>{transaction.description}</TableCell>
+                                                <TableCell>{transaction.category || '-'}</TableCell>
+                                                <TableCell
+                                                    sx={{
+                                                        color: 'red',
+                                                        fontWeight: 'bold'
+                                                    }}
+                                                >
+                                                    {getCurrencySymbol(selectedCurrency)}
+                                                    {(selectedCurrency === 'ILS'
+                                                        ? Number(transaction.amount)
+                                                        : convertedAmounts[transaction._id] || Number(transaction.amount)
+                                                    ).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() => setEditTransaction(transaction)}
+                                                        sx={{ mr: 1 }}
+                                                    >
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                    <IconButton
+                                                        size="small"
+                                                        color="error"
+                                                        onClick={() => handleDeleteClick(transaction._id)}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
                                                 </TableCell>
                                             </TableRow>
                                         );
-                                    }
+                                    });
 
-                                    // הוספת שורת עסקה
-                                    rows.push(
-                                        <TableRow key={transaction._id}>
-                                            <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
-                                            <TableCell>{transaction.description}</TableCell>
-                                            <TableCell>{transaction.category || '-'}</TableCell>
-                                            <TableCell
-                                                sx={{
-                                                    color: 'red',
-                                                    fontWeight: 'bold'
-                                                }}
-                                            >
-                                                {getCurrencySymbol(selectedCurrency)}
-                                                {(selectedCurrency === 'ILS'
-                                                    ? Number(transaction.amount)
-                                                    : convertedAmounts[transaction._id] || Number(transaction.amount)
-                                                ).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                            </TableCell>
-                                            <TableCell>
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={() => setEditTransaction(transaction)}
-                                                    sx={{ mr: 1 }}
-                                                >
-                                                    <EditIcon />
-                                                </IconButton>
-                                                <IconButton
-                                                    size="small"
-                                                    color="error"
-                                                    onClick={() => handleDeleteClick(transaction._id)}
-                                                >
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                });
+                                    return rows;
+                                })()
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} sx={{ textAlign: 'center' }}>
+                                        אין הוצאות בטווח הזמן שנבחר
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
 
-                                return rows;
-                            })()
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={5} sx={{ textAlign: 'center' }}>
-                                    אין הוצאות בטווח הזמן שנבחר
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-
-            {/* אזור התרשימים - עוגה וגרף קו */}
-            <Box sx={{
-                mt: 4,
-                width: '80%',
-                display: 'flex',
-                flexDirection: { xs: 'column', md: 'row' },  // טור במובייל, שורה במסך רגיל
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                gap: 3
-            }}>
-                {/* תרשים עוגה */}
+                {/* אזור התרשימים - עוגה וגרף קו */}
                 <Box sx={{
-                    width: { xs: '100%', md: '50%' },
+                    mt: 4,
+                    width: '80%',
                     display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
+                    flexDirection: { xs: 'column', md: 'row' },  // טור במובייל, שורה במסך רגיל
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: 3
                 }}>
-                    <Typography
-                        variant="h6"
-                        align="center"
-                        sx={{
-                            mb: 2,
-                            color: '#658285',
-                            fontWeight: 'bold'
-                        }}
-                    >
-                        התפלגות הוצאות לפי קטגוריות ({dateRangeToDisplay()})
-                    </Typography>
+                    {/* תרשים עוגה */}
                     <Box sx={{
+                        width: { xs: '100%', md: '50%' },
                         display: 'flex',
-                        justifyContent: 'center',
-                        backgroundColor: 'transparent'
+                        flexDirection: 'column',
+                        alignItems: 'center',
                     }}>
-                        <PieChart
-                            series={[
-                                {
-                                    data: pieChartData,
-                                    highlightScope: { faded: 'global', highlighted: 'item' },
-                                    paddingAngle: 2,
-                                    innerRadius: 20,
-                                    outerRadius: 140,
-                                    cornerRadius: 4,
-                                    startAngle: -90,
-                                    endAngle: 270,
-                                },
-                            ]}
-                            width={700}
-                            height={400}
-                            margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        <Typography
+                            variant="h6"
+                            align="center"
                             sx={{
-                                backgroundColor: 'transparent',
-                                '--ChartsLegend-rootSpacing': '10px',
-                                '--ChartsLegend-itemWidth': '100%',
-                                '--ChartsLegend-itemMarkSize': '10px',
-                                '--ChartsLegend-itemMarkBorderRadius': '5px',
-                                '& .MuiChartsLegend-mark': {
-                                    borderRadius: '5px',
-                                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                                    transform: 'translate(30px, 0)',
-                                },
-                                '& .MuiChartsLegend-label': {
-                                    fontSize: '0.9rem',
-                                    fontWeight: 'medium',
-                                    color: '#555555',
-                                },
-                                '& .MuiChartsLegend-item': {
-                                    marginBottom: '4px',
-                                },
-                                '& .MuiChartsArc-root:hover': {
-                                    filter: 'brightness(0.9)',
-                                    cursor: 'pointer',
-                                },
-                                '& .MuiChartsArc-arc': {
-                                    strokeWidth: 1,
-                                    stroke: '#fff',
-                                    transition: 'all 0.2s',
-                                },
-                                '& .MuiChartsArc-root:hover .MuiChartsArc-arc': {
-                                    stroke: '#fff',
-                                    strokeWidth: 2,
-                                },
-                                '& .MuiChartsArc-root:hover .MuiChartsArc-highlighted': {
-                                    transform: 'scale(1.05)',
-                                    transformOrigin: 'center',
-                                },
+                                mb: 2,
+                                color: '#658285',
+                                fontWeight: 'bold'
                             }}
-                            slotProps={{
-                                legend: {
-                                    direction: 'column',
-                                    position: { vertical: 'middle', horizontal: 'right' },
-                                    padding: 10,
-                                    itemMarkWidth: 14,
-                                    itemMarkHeight: 14,
-                                    markGap: 8,
-                                    itemGap: 10,
-                                    labelStyle: {
-                                        fontSize: 12,
-                                        fontWeight: 500,
+                        >
+                            התפלגות הוצאות לפי קטגוריות ({dateRangeToDisplay()})
+                        </Typography>
+                        <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            backgroundColor: 'transparent'
+                        }}>
+                            <PieChart
+                                series={[
+                                    {
+                                        data: pieChartData,
+                                        highlightScope: { faded: 'global', highlighted: 'item' },
+                                        paddingAngle: 2,
+                                        innerRadius: 20,
+                                        outerRadius: 140,
+                                        cornerRadius: 4,
+                                        startAngle: -90,
+                                        endAngle: 270,
                                     },
-                                },
-                            }}
-                            tooltip={{
-                                trigger: 'item',
-                                formatter: (item) => {
-                                    const category = item.category || item.label.split(':')[0];
-                                    return {
-                                        title: category,
-                                        content: `${getCurrencySymbol(selectedCurrency)}${item.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
-                                    };
-                                },
-                            }}
+                                ]}
+                                width={700}
+                                height={400}
+                                margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                sx={{
+                                    backgroundColor: 'transparent',
+                                    '--ChartsLegend-rootSpacing': '10px',
+                                    '--ChartsLegend-itemWidth': '100%',
+                                    '--ChartsLegend-itemMarkSize': '10px',
+                                    '--ChartsLegend-itemMarkBorderRadius': '5px',
+                                    '& .MuiChartsLegend-mark': {
+                                        borderRadius: '5px',
+                                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                                        transform: 'translate(30px, 0)',
+                                    },
+                                    '& .MuiChartsLegend-label': {
+                                        fontSize: '0.9rem',
+                                        fontWeight: 'medium',
+                                        color: '#555555',
+                                    },
+                                    '& .MuiChartsLegend-item': {
+                                        marginBottom: '4px',
+                                    },
+                                    '& .MuiChartsArc-root:hover': {
+                                        filter: 'brightness(0.9)',
+                                        cursor: 'pointer',
+                                    },
+                                    '& .MuiChartsArc-arc': {
+                                        strokeWidth: 1,
+                                        stroke: '#fff',
+                                        transition: 'all 0.2s',
+                                    },
+                                    '& .MuiChartsArc-root:hover .MuiChartsArc-arc': {
+                                        stroke: '#fff',
+                                        strokeWidth: 2,
+                                    },
+                                    '& .MuiChartsArc-root:hover .MuiChartsArc-highlighted': {
+                                        transform: 'scale(1.05)',
+                                        transformOrigin: 'center',
+                                    },
+                                }}
+                                slotProps={{
+                                    legend: {
+                                        direction: 'column',
+                                        position: { vertical: 'middle', horizontal: 'right' },
+                                        padding: 10,
+                                        itemMarkWidth: 14,
+                                        itemMarkHeight: 14,
+                                        markGap: 8,
+                                        itemGap: 10,
+                                        labelStyle: {
+                                            fontSize: 12,
+                                            fontWeight: 500,
+                                        },
+                                    },
+                                }}
+                                tooltip={{
+                                    trigger: 'item',
+                                    formatter: (item) => {
+                                        const category = item.category || item.label.split(':')[0];
+                                        return {
+                                            title: category,
+                                            content: `${getCurrencySymbol(selectedCurrency)}${item.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
+                                        };
+                                    },
+                                }}
+                            />
+                        </Box>
+                    </Box>
+
+                    {/* תרשים קו */}
+                    <Box sx={{
+                        width: { xs: '100%', md: '50%' },
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                    }}>
+                        <ExpensesChart
+                            filteredTransactions={filteredTransactions}
+                            dateRange={dateRange}
+                            selectedCurrency={selectedCurrency}
+                            getCurrencySymbol={getCurrencySymbol}
+                            convertedAmounts={convertedAmounts}
                         />
                     </Box>
                 </Box>
 
-                {/* תרשים קו */}
-                <Box sx={{
-                    width: { xs: '100%', md: '50%' },
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                }}>
-                    <ExpensesChart
-                        filteredTransactions={filteredTransactions}
-                        dateRange={dateRange}
-                        selectedCurrency={selectedCurrency}
-                        getCurrencySymbol={getCurrencySymbol}
-                        convertedAmounts={convertedAmounts}
-                    />
-                </Box>
+                {/* דילוג להוספת הוצאה */}
+                <AddTransactionDialog
+                    open={showAddDialog}
+                    onClose={() => setShowAddDialog(false)}
+                    type="expense"
+                    onSuccess={loadTransactions}
+                />
+                {/* דילוג לעריכת הוצאה */}
+                <EditTransactionDialog
+                    open={!!editTransaction}
+                    onClose={() => setEditTransaction(null)}
+                    transaction={editTransaction}
+                    onSuccess={() => {
+                        loadTransactions();
+                        setEditTransaction(null);
+                    }}
+                />
+                {/* דיאלוג אישור מחיקה */}
+                <Dialog
+                    open={deleteDialog.open}
+                    onClose={() => setDeleteDialog({ open: false, transactionId: null })}
+                    sx={{
+                        '& .MuiDialog-paper': {
+                            backgroundColor: '#e9d0ab',
+                            color: '#658285'
+                        }
+                    }}
+                >
+                    <DialogTitle>אישור מחיקה</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            האם אתה בטוח שברצונך למחוק הוצאה זו?
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button
+                            onClick={() => setDeleteDialog({ open: false, transactionId: null })}
+                            sx={{ color: '#658285' }}
+                        >
+                            ביטול
+                        </Button>
+                        <Button
+                            onClick={handleDeleteConfirm}
+                            variant="contained"
+                            color="error"
+                        >
+                            מחק
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Box>
-
-            {/* דילוג להוספת הוצאה */}
-            <AddTransactionDialog
-                open={showAddDialog}
-                onClose={() => setShowAddDialog(false)}
-                type="expense"
-                onSuccess={loadTransactions}
-            />
-            {/* דילוג לעריכת הוצאה */}
-            <EditTransactionDialog
-                open={!!editTransaction}
-                onClose={() => setEditTransaction(null)}
-                transaction={editTransaction}
-                onSuccess={() => {
-                    loadTransactions();
-                    setEditTransaction(null);
-                }}
-            />
-            {/* דיאלוג אישור מחיקה */}
-            <Dialog
-                open={deleteDialog.open}
-                onClose={() => setDeleteDialog({ open: false, transactionId: null })}
-                sx={{
-                    '& .MuiDialog-paper': {
-                        backgroundColor: '#e9d0ab',
-                        color: '#658285'
-                    }
-                }}
-            >
-                <DialogTitle>אישור מחיקה</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        האם אתה בטוח שברצונך למחוק הוצאה זו?
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        onClick={() => setDeleteDialog({ open: false, transactionId: null })}
-                        sx={{ color: '#658285' }}
-                    >
-                        ביטול
-                    </Button>
-                    <Button
-                        onClick={handleDeleteConfirm}
-                        variant="contained"
-                        color="error"
-                    >
-                        מחק
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </Box>
+        </CacheProvider>
     );
 } 

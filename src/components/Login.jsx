@@ -16,7 +16,7 @@ export default function Login(props) {
     // פונקציה להתחברות
     const handleLogin = () => {
         if (loading) {
-            return;
+            reםלturn;
         }
         if (!email || !password) {
             return setError('Enter email and password');

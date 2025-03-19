@@ -17,7 +17,6 @@ import UserCard from './UserCard';
 import { NavLink } from 'react-router-dom';
 
 
-
 // רשימת העמודים עם הנתיבים שלהם
 const pages = [
     { name: 'בית', path: '/' },
@@ -25,8 +24,8 @@ const pages = [
     { name: 'הכנסות', path: '/income' },
     { name: 'הוצאות', path: '/expenses' },
     { name: 'תזכורות', path: '/reminders' },
+    { name: 'משימות', path: '/tasks' },
     { name: 'בנק', path: '/bank' },
-    { name: 'מטלות', path: '/tasks' }
 ];
 // קישור למנהל מערכת
 const adminPage = { name: 'מנהל מערכת', path: '/admin' };
@@ -36,7 +35,6 @@ export default function UpperBar() {
     const [anchorElUser, setAnchorElUser] = useState(null);
     const [showRegisterModal, setShowRegisterModal] = useState(false);
     const { user } = useContext(UserContext);
-
     const handleOpenNavMenu = (event) => setAnchorElNav(event.currentTarget);
     const handleCloseNavMenu = () => setAnchorElNav(null);
     const handleOpenRegisterModal = () => {
@@ -90,7 +88,7 @@ export default function UpperBar() {
                                     </NavLink>
                                 ))}
                                 {/* הוספת קישור אדמין לתפריט המבורגר - מוצג רק למשתמשים עם הרשאת מנהל */}
-                                {(!user || user?.permission === 'admin') && (
+                                {user?.permission === 'admin' && (
                                     <NavLink
                                         key={adminPage.name}
                                         to={adminPage.path}
@@ -157,7 +155,7 @@ export default function UpperBar() {
                         {/* אזור המשתמש */}
                         <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
                             {/* קישור אדמין בצד שמאל - מוצג רק למשתמשים עם הרשאת מנהל */}
-                            {(!user || user?.permission === 'admin') && (
+                            {user?.permission === 'admin' && (
                                 <NavLink
                                     key={adminPage.name}
                                     to={adminPage.path}

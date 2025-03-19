@@ -38,6 +38,15 @@ import AddTransactionDialog from './AddTransactionDialog';
 import EditTransactionDialog from './EditTransactionDialog';
 import dayjs from 'dayjs';
 import { convertCurrency } from '../api/currencyApi';
+import rtlPlugin from 'stylis-plugin-rtl';
+import { prefixer } from 'stylis';
+import { CacheProvider } from '@emotion/react';
+import createCache from '@emotion/cache';
+
+const cacheRtl = createCache({
+    key: 'muirtl',
+    stylisPlugins: [prefixer, rtlPlugin],
+});
 
 // מסך ההכנסות
 export default function Income() {
@@ -314,265 +323,265 @@ export default function Income() {
 
     // מסך ההכנסות
     return (
-        <Box sx={{ p: 3 }}>
-            {error && (
-                <Typography color="error" sx={{ mb: 2 }}>
-                    {error}
-                </Typography>
-            )}
+        <CacheProvider value={cacheRtl}>
+            <Box sx={{ p: 3 }}>
+                {error && (
+                    <Typography color="error" sx={{ mb: 2 }}>
+                        {error}
+                    </Typography>
+                )}
 
-            {/* בחירת מטבע - העברנו למעלה */}
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
-                <FormControl sx={{ minWidth: 120 }}>
-                    <InputLabel>מטבע</InputLabel>
-                    <Select
-                        value={selectedCurrency}
-                        onChange={(e) => setSelectedCurrency(e.target.value)}
-                        label="מטבע"
-                    >
-                        {currencies.map((currency) => (
-                            <MenuItem key={currency.value} value={currency.value}>
-                                {currency.label}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            </Box>
+                {/* בחירת מטבע - העברנו למעלה */}
+                <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
+                    <FormControl sx={{ minWidth: 120 }}>
+                        <InputLabel>מטבע</InputLabel>
+                        <Select
+                            value={selectedCurrency}
+                            onChange={(e) => setSelectedCurrency(e.target.value)}
+                            label="מטבע"
+                        >
+                            {currencies.map((currency) => (
+                                <MenuItem key={currency.value} value={currency.value}>
+                                    {currency.label}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Box>
 
-            {/* כרטיס סך הכנסות */}
-            <Paper sx={{
-                p: 2,
-                mb: 4,
-                bgcolor: '#e8f5e9',
-                textAlign: 'center',
-                borderRadius: '10px',
-                width: '50%',
-                margin: '0 auto'
-            }}>
-                <Typography variant="h6">סך הכנסות ({dateRangeToDisplay()})</Typography>
-                <Typography variant="h4" sx={{ my: 2 }}>
-                    {getCurrencySymbol(selectedCurrency)}
-                    {convertedTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                </Typography>
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => setShowAddDialog(true)}
-                    sx={{
-                        backgroundColor: '#4caf50',
-                        '&:hover': { backgroundColor: '#388e3c' }
-                    }}
-                >
-                    הוסף הכנסה
-                </Button>
-            </Paper>
-
-            {/* טווח זמן לסינון */}
-            <Box sx={{ color: '#658285', p: 2, mb: 3, textAlign: 'center' }}>
-                <Typography variant="h6" gutterBottom>
-                    בחר טווח זמן להצגת נתונים
-                </Typography>
-                <ToggleButtonGroup
-                    value={dateRange}
-                    exclusive
-                    onChange={(e, newValue) => {
-                        if (newValue) setDateRange(newValue);
-                    }}
-                    aria-label="טווח זמן"
-                    sx={{ mt: 1 }}
-                >
-                    <ToggleButton value="day" aria-label="יום">
-                        <CalendarViewDayIcon sx={{ mr: 1, color: '#e9d0ab' }} />
-                        יום
-                    </ToggleButton>
-                    <ToggleButton value="week" aria-label="שבוע">
-                        <ViewWeekIcon sx={{ mr: 1, color: '#e9d0ab' }} />
-                        שבוע
-                    </ToggleButton>
-                    <ToggleButton value="month" aria-label="חודש">
-                        <DateRangeIcon sx={{ mr: 1, color: '#e9d0ab' }} />
-                        חודש
-                    </ToggleButton>
-                    <ToggleButton value="year" aria-label="שנה">
-                        <CalendarMonthIcon sx={{ mr: 1, color: '#e9d0ab' }} />
-                        שנה
-                    </ToggleButton>
-                </ToggleButtonGroup>
-            </Box>
-
-            {/* טבלת ההכנסות */}
-            <TableContainer component={Paper}
-                sx={{
-                    backgroundColor: '#658285',
-                    height: '50vh',
-                    width: '75%',
+                {/* כרטיס סך הכנסות */}
+                <Paper sx={{
+                    p: 2,
+                    mb: 4,
+                    bgcolor: '#e8f5e9',
+                    textAlign: 'center',
+                    borderRadius: '10px',
+                    width: '50%',
                     margin: '0 auto'
                 }}>
-                <Table>
-                    <TableHead sx={{ position: 'sticky', top: 0, backgroundColor: '#658285', zIndex: 1 }}>
-                        <TableRow>
-                            <TableCell
-                                sx={{
-                                    color: '#e9d0ab',
-                                    cursor: 'pointer',
-                                    fontSize: '1rem',
-                                    '&:hover': { opacity: 0.8 }
-                                }}
-                                onClick={toggleSortDirection}
-                            >
-                                תאריך {sortDirection === 'asc' ? '↑' : '↓'}
-                            </TableCell>
-                            <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>תיאור</TableCell>
-                            <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>סכום</TableCell>
-                            <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>פעולות</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody sx={{ backgroundColor: '#e9d0ab' }}>
-                        {organizedTransactions.length > 0 ? (
-                            organizedTransactions.map((item) => (
-                                item.isMonthHeader ? (
-                                    // שורת כותרת החודש
-                                    <TableRow
+                    <Typography variant="h6">סך הכנסות ({dateRangeToDisplay()})</Typography>
+                    <Typography variant="h4" sx={{ my: 2 }}>
+                        {getCurrencySymbol(selectedCurrency)}
+                        {convertedTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    </Typography>
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => setShowAddDialog(true)}
+                        sx={{
+                            backgroundColor: '#4caf50',
+                            '&:hover': { backgroundColor: '#388e3c' }
+                        }}
+                    >
+                        הוסף הכנסה
+                    </Button>
+                </Paper>
 
-                                        key={item.id}
-                                        sx={{
-                                            backgroundColor: '#658285',
-                                            '& td': {
-                                                backgroundColor: '#658285',
-                                                color: '#e9d0ab',
-                                                fontWeight: 'bold',
-                                                fontSize: '1.1rem',
-                                                borderBottom: '2px solid #e9d0ab',
-                                                py: 1,
+                {/* טווח זמן לסינון */}
+                <Box sx={{ color: '#658285', p: 2, mb: 3, textAlign: 'center' }}>
+                    <Typography variant="h6" gutterBottom>
+                        בחר טווח זמן להצגת נתונים
+                    </Typography>
+                    <ToggleButtonGroup
+                        value={dateRange}
+                        exclusive
+                        onChange={(e, newValue) => {
+                            if (newValue) setDateRange(newValue);
+                        }}
+                        aria-label="טווח זמן"
+                        sx={{ mt: 1 }}
+                    >
+                        <ToggleButton value="day" aria-label="יום">
+                            <CalendarViewDayIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                            יום
+                        </ToggleButton>
+                        <ToggleButton value="week" aria-label="שבוע">
+                            <ViewWeekIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                            שבוע
+                        </ToggleButton>
+                        <ToggleButton value="month" aria-label="חודש">
+                            <DateRangeIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                            חודש
+                        </ToggleButton>
+                        <ToggleButton value="year" aria-label="שנה">
+                            <CalendarMonthIcon sx={{ mr: 1, color: '#e9d0ab' }} />
+                            שנה
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </Box>
 
-                                                position: 'sticky',
-                                                top: 45,
-                                                zIndex: 1,
+                {/* טבלת ההכנסות */}
+                <TableContainer component={Paper}
+                    sx={{
+                        backgroundColor: '#658285',
+                        height: '50vh',
+                        width: '75vw',
+                        margin: '0 auto'
+                    }}>
+                    <Table>
+                        <TableHead sx={{ position: 'sticky', top: 0, backgroundColor: '#658285', zIndex: 1 }}>
+                            <TableRow>
+                                <TableCell
+                                    sx={{
+                                        color: '#e9d0ab',
+                                        cursor: 'pointer',
+                                        fontSize: '1rem',
+                                        '&:hover': { opacity: 0.8 }
+                                    }}
+                                    onClick={toggleSortDirection}
+                                >
+                                    תאריך {sortDirection === 'asc' ? '↑' : '↓'}
+                                </TableCell>
+                                <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>תיאור</TableCell>
+                                <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem' }}>סכום</TableCell>
+                                <TableCell sx={{ color: '#e9d0ab', fontSize: '1rem', width: '100px' }}>פעולות</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody sx={{ backgroundColor: '#e9d0ab' }}>
+                            {organizedTransactions.length > 0 ? (
+                                organizedTransactions.map((item) => (
+                                    item.isMonthHeader ? (
+                                        // שורת כותרת החודש
+                                        <TableRow
 
-
-                                            }
-                                        }}
-                                    >
-                                        <TableCell colSpan={4} align="center">
-                                            {item.monthHeader}
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    // שורת עסקה רגילה
-                                    <TableRow key={item._id}>
-                                        <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
-                                        <TableCell>{item.description}</TableCell>
-                                        <TableCell
+                                            key={item.id}
                                             sx={{
-                                                color: 'green',
-                                                fontWeight: 'bold'
+                                                backgroundColor: '#658285',
+                                                '& td': {
+                                                    backgroundColor: '#658285',
+                                                    color: '#e9d0ab',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '1.1rem',
+                                                    borderBottom: '2px solid #e9d0ab',
+                                                    py: 1,
+
+                                                    position: 'sticky',
+                                                    top: 45,
+                                                    zIndex: 1,
+                                                }
                                             }}
                                         >
-                                            {getCurrencySymbol(selectedCurrency)}
-                                            {(selectedCurrency === 'ILS'
-                                                ? Number(item.amount)
-                                                : convertedAmounts[item._id] || Number(item.amount)
-                                            ).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                                        </TableCell>
-                                        <TableCell>
-                                            <IconButton
-                                                size="small"
-                                                onClick={() => setEditTransaction(item)}
-                                                sx={{ mr: 1 }}
+                                            <TableCell colSpan={4} align="center">
+                                                {item.monthHeader}
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : (
+                                        // שורת עסקה רגילה
+                                        <TableRow key={item._id}>
+                                            <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
+                                            <TableCell>{item.description}</TableCell>
+                                            <TableCell
+                                                sx={{
+                                                    color: 'green',
+                                                    fontWeight: 'bold'
+                                                }}
                                             >
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton
-                                                size="small"
-                                                color="error"
-                                                onClick={() => handleDeleteClick(item._id)}
-                                                disabled={!item._id}
-                                            >
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={4} sx={{ textAlign: 'center' }}>
-                                    אין הכנסות בטווח הזמן שנבחר
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            {/* דילוג להוספת הכנסה */}
-            <AddTransactionDialog
-                open={showAddDialog}
-                onClose={() => setShowAddDialog(false)}
-                type="income"
-                onSuccess={loadTransactions}
-            />
-            {/* דילוג לעריכת הכנסה */}
-            <EditTransactionDialog
-                open={!!editTransaction}
-                onClose={() => setEditTransaction(null)}
-                transaction={editTransaction}
-                onSuccess={() => {
-                    loadTransactions();
-                    setEditTransaction(null);
-                }}
-            />
-            {/* דיאלוג אישור מחיקה */}
-            <Dialog
-                open={deleteDialog.open}
-                onClose={() => setDeleteDialog({ open: false, transactionId: null })}
-                aria-modal="true"
-                role="alertdialog"
-                sx={{
-                    '& .MuiDialog-paper': {
-                        backgroundColor: '#e9d0ab',
-                        color: '#658285'
-                    }
-                }}
-            >
-                <DialogTitle>אישור מחיקה</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        האם אתה בטוח שברצונך למחוק הכנסה זו?
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        onClick={() => setDeleteDialog({ open: false, transactionId: null })}
-                        aria-label="ביטול מחיקת הכנסה"
-                    >
-                        ביטול
-                    </Button>
-                    <Button
-                        onClick={handleDeleteConfirm}
-                        color="error"
-                        variant="contained"
-                        aria-label="אישור מחיקת הכנסה"
-                    >
-                        מחק
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* הודעות למשתמש */}
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={3000}
-                onClose={handleCloseSnackbar}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-            >
-                <Alert
-                    onClose={handleCloseSnackbar}
-                    severity={snackbar.severity}
-                    sx={{ width: '100%' }}
+                                                {getCurrencySymbol(selectedCurrency)}
+                                                {(selectedCurrency === 'ILS'
+                                                    ? Number(item.amount)
+                                                    : convertedAmounts[item._id] || Number(item.amount)
+                                                ).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                            </TableCell>
+                                            <TableCell>
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => setEditTransaction(item)}
+                                                    sx={{ mr: 1 }}
+                                                >
+                                                    <EditIcon />
+                                                </IconButton>
+                                                <IconButton
+                                                    size="small"
+                                                    color="error"
+                                                    onClick={() => handleDeleteClick(item._id)}
+                                                    disabled={!item._id}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} sx={{ textAlign: 'center' }}>
+                                        אין הכנסות בטווח הזמן שנבחר
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                {/* דילוג להוספת הכנסה */}
+                <AddTransactionDialog
+                    open={showAddDialog}
+                    onClose={() => setShowAddDialog(false)}
+                    type="income"
+                    onSuccess={loadTransactions}
+                />
+                {/* דילוג לעריכת הכנסה */}
+                <EditTransactionDialog
+                    open={!!editTransaction}
+                    onClose={() => setEditTransaction(null)}
+                    transaction={editTransaction}
+                    onSuccess={() => {
+                        loadTransactions();
+                        setEditTransaction(null);
+                    }}
+                />
+                {/* דיאלוג אישור מחיקה */}
+                <Dialog
+                    open={deleteDialog.open}
+                    onClose={() => setDeleteDialog({ open: false, transactionId: null })}
+                    aria-modal="true"
+                    role="alertdialog"
+                    sx={{
+                        '& .MuiDialog-paper': {
+                            backgroundColor: '#e9d0ab',
+                            color: '#658285'
+                        }
+                    }}
                 >
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
-        </Box>
+                    <DialogTitle>אישור מחיקה</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            האם אתה בטוח שברצונך למחוק הכנסה זו?
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button
+                            onClick={() => setDeleteDialog({ open: false, transactionId: null })}
+                            aria-label="ביטול מחיקת הכנסה"
+                        >
+                            ביטול
+                        </Button>
+                        <Button
+                            onClick={handleDeleteConfirm}
+                            color="error"
+                            variant="contained"
+                            aria-label="אישור מחיקת הכנסה"
+                        >
+                            מחק
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
+                {/* הודעות למשתמש */}
+                <Snackbar
+                    open={snackbar.open}
+                    autoHideDuration={3000}
+                    onClose={handleCloseSnackbar}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                    <Alert
+                        onClose={handleCloseSnackbar}
+                        severity={snackbar.severity}
+                        sx={{ width: '100%' }}
+                    >
+                        {snackbar.message}
+                    </Alert>
+                </Snackbar>
+            </Box>
+        </CacheProvider>
     );
 } 

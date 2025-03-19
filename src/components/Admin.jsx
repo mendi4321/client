@@ -256,6 +256,7 @@ export default function Admin() {
                         backgroundColor: '#658285',
                     }
                 }}
+                keepMounted={false}
             >
                 <DialogTitle sx={{ backgroundColor: '#658285', color: '#e9d0ab' }}>
                     אישור מחיקת משתמש
